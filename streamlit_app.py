@@ -25,8 +25,13 @@ import streamlit as st
 # ---------------------------------------------------------------------------
 
 APP_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = APP_DIR.parent
-MODEL_PATH = PROJECT_ROOT / "models" / "random_forest.joblib"
+
+# Procura o modelo em locais possiveis (funciona tanto local quanto no Streamlit Cloud)
+_CANDIDATOS_MODELO = [
+    APP_DIR / "models" / "random_forest.joblib",         # deploy: streamlit_app.py + models/ na raiz do repo
+    APP_DIR.parent / "models" / "random_forest.joblib",  # local: app/ subfolder e models/ um nivel acima
+]
+MODEL_PATH = next((p for p in _CANDIDATOS_MODELO if p.exists()), _CANDIDATOS_MODELO[0])
 
 CUTOFF_YOUDEN = 0.517
 CUTOFF_ALTA_SENS = 0.441
