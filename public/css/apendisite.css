@@ -663,6 +663,7 @@ input[aria-invalid="true"] {
   border-bottom: 1px solid var(--linha);
 }
 
+.escores > summary,
 .sobre summary {
   display: flex;
   align-items: center;
@@ -785,6 +786,7 @@ input[aria-invalid="true"] {
     text-decoration: underline;
   }
 
+  .escores > summary:hover,
   .sobre summary:hover {
     text-decoration: underline;
   }
