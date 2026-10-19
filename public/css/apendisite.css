@@ -23,6 +23,19 @@
   --nota: #e9f0f6;
   --veu: rgb(22 38 54 / 0.45);
 
+  /* Faixas do resultado. A cor marca a borda e os quadrados cheios (3:1 ou mais
+     contra o fundo da faixa), o texto da faixa usa o tom escuro (4,5:1 ou mais).
+     O amarelo é escurecido até o ocre para passar de 3:1 sobre fundo claro. */
+  --verde: #2f7a3b;
+  --verde-fundo: #ebf6ed;
+  --verde-texto: #1d5227;
+  --amarelo: #a37800;
+  --amarelo-fundo: #fdf5d3;
+  --amarelo-texto: #5c4500;
+  --vermelho: #c0362c;
+  --vermelho-fundo: #fcecea;
+  --vermelho-texto: #8a1f17;
+
   --fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --texto-meta: 0.8125rem;
   --texto-menor: 0.875rem;
@@ -439,12 +452,32 @@ input[aria-invalid="true"] {
 
 /* Resultado */
 
+/* A faixa vem da classe que o app.js põe na section. Sem classe de faixa, o
+   bloco fica neutro. A faixa também está escrita no texto do resultado. */
 .resultado {
   margin-top: var(--e6);
   padding: var(--e5) var(--e4);
-  border: 1px solid var(--linha);
+  border: 1px solid var(--faixa-cor, var(--linha));
   border-radius: var(--raio-bloco);
-  background: var(--campo);
+  background: var(--faixa-fundo, var(--campo));
+}
+
+.resultado.faixa-baixa {
+  --faixa-cor: var(--verde);
+  --faixa-fundo: var(--verde-fundo);
+  --faixa-texto: var(--verde-texto);
+}
+
+.resultado.faixa-intermediaria {
+  --faixa-cor: var(--amarelo);
+  --faixa-fundo: var(--amarelo-fundo);
+  --faixa-texto: var(--amarelo-texto);
+}
+
+.resultado.faixa-alta {
+  --faixa-cor: var(--vermelho);
+  --faixa-fundo: var(--vermelho-fundo);
+  --faixa-texto: var(--vermelho-texto);
 }
 
 .resultado > * + * {
@@ -469,6 +502,7 @@ input[aria-invalid="true"] {
 }
 
 .faixa {
+  color: var(--faixa-texto, var(--tinta));
   font-weight: 600;
 }
 
@@ -491,8 +525,8 @@ input[aria-invalid="true"] {
 }
 
 .quadrado.cheio {
-  border-color: var(--marinho);
-  background: var(--marinho);
+  border-color: var(--faixa-cor, var(--marinho));
+  background: var(--faixa-cor, var(--marinho));
 }
 
 .legenda {
@@ -504,6 +538,11 @@ input[aria-invalid="true"] {
   padding: var(--e3) var(--e4);
   border-radius: var(--raio-controle);
   background: var(--nota);
+}
+
+/* Dentro do bloco tingido, o aviso fica em branco para não somar o azul à faixa. */
+.resultado .aviso {
+  background: var(--campo);
 }
 
 .linhas {
