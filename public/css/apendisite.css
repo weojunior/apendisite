@@ -455,11 +455,13 @@ input[aria-invalid="true"] {
   font-size: var(--texto-grupo);
 }
 
+/* Quebra equilibrada: no celular, a linha do escore não deixa "(0" sozinho no fim. */
 .escore {
   font-size: var(--texto-titulo);
   font-weight: 700;
   line-height: 1.25;
   font-variant-numeric: tabular-nums;
+  text-wrap: balance;
 }
 
 .corte {
