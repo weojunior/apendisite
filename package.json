@@ -1,0 +1,13 @@
+{
+  "name": "apendisite",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "apendisite: a random forest for appendicitis in children",
+  "scripts": {
+    "test": "node --test 'tests/js/*.test.js'"
+  },
+  "devDependencies": {
+    "wrangler": "4.147.0"
+  }
+}
