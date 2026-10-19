@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node e Wrangler
+node_modules/
+.wrangler/
+.dev.vars
+
+# Dados locais e backups (nenhuma linha de paciente entra no Git)
+*.pkl
+dados_locais/
+backup_*.sql
+
+# Pacote do Zenodo gerado
+dist/
+
+# macOS e editores
+.DS_Store
+.vscode/
+.idea/

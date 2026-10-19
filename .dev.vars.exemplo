@@ -1,0 +1,2 @@
+# Copiar para .dev.vars (fora do Git) antes do wrangler dev.
+ORIGEM_PERMITIDA=http://localhost:8787
