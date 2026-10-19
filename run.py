@@ -8,6 +8,7 @@ Uso:
 
 import argparse
 import hashlib
+import json
 import sys
 from pathlib import Path
 
@@ -15,7 +16,16 @@ RAIZ = Path(__file__).resolve().parent
 sys.path.insert(0, str(RAIZ / "src"))
 
 from apendisite_conversao.excecoes import ErroApendisite  # noqa: E402
-from apendisite_conversao.exportar import exportar_modelo  # noqa: E402
+from apendisite_conversao.exportar import (  # noqa: E402
+    carregar_pipeline,
+    exportar_modelo,
+)
+from apendisite_conversao.sinteticos import (  # noqa: E402
+    SEMENTE,
+    anotar_esperados,
+    gerar_casos,
+    gravar_casos,
+)
 
 CAMINHO_JOBLIB = RAIZ / "models" / "random_forest.joblib"
 CAMINHO_JSON = RAIZ / "public" / "modelo" / "random_forest_v1.0.0.json"
@@ -34,11 +44,23 @@ def _exportar(_: argparse.Namespace) -> int:
     return 0
 
 
+def _sinteticos(_: argparse.Namespace) -> int:
+    modelo_json = json.loads(CAMINHO_JSON.read_text(encoding="utf-8"))
+    pipeline = carregar_pipeline(CAMINHO_JOBLIB)
+    casos = anotar_esperados(pipeline, gerar_casos(modelo_json, SEMENTE))
+    gravar_casos(CAMINHO_CASOS, casos, SEMENTE, _sha256(CAMINHO_JSON))
+    print(f"{len(casos)} casos gravados em {CAMINHO_CASOS.relative_to(RAIZ)}")
+    return 0
+
+
 def _montar_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Conversão do apendisite")
     sub = parser.add_subparsers(dest="comando", required=True)
     sub.add_parser("exportar", help="exporta o .joblib para JSON").set_defaults(
         funcao=_exportar
+    )
+    sub.add_parser("sinteticos", help="gera os casos sintéticos").set_defaults(
+        funcao=_sinteticos
     )
     return parser
 
