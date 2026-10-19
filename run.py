@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
@@ -19,6 +20,14 @@ from apendisite_conversao.excecoes import ErroApendisite  # noqa: E402
 from apendisite_conversao.exportar import (  # noqa: E402
     carregar_pipeline,
     exportar_modelo,
+)
+from apendisite_conversao.paridade import (  # noqa: E402
+    avaliar_em_js,
+    carregar_dados_locais,
+    comparar,
+    contar_padroes_faltantes,
+    escrever_relatorio_659,
+    quadro_para_entradas,
 )
 from apendisite_conversao.sinteticos import (  # noqa: E402
     SEMENTE,
@@ -53,6 +62,28 @@ def _sinteticos(_: argparse.Namespace) -> int:
     return 0
 
 
+def _paridade_local(args: argparse.Namespace) -> int:
+    quadro = carregar_dados_locais(Path(args.dados).expanduser())
+    pipeline = carregar_pipeline(CAMINHO_JOBLIB)
+    esperados = pipeline.predict_proba(quadro)[:, 1].tolist()
+    obtidos = avaliar_em_js(quadro_para_entradas(quadro), CAMINHO_JSON, RAIZ)
+    resumo = comparar(esperados, obtidos)
+    idade = quadro["idade_anos"]
+    fora_da_faixa = int(((idade < 2) | (idade > 14)).sum())
+    escrever_relatorio_659(
+        CAMINHO_RELATORIO_659, resumo, contar_padroes_faltantes(quadro),
+        fora_da_faixa, _sha256(CAMINHO_JSON), date.today(),
+    )
+    print(
+        f"n={resumo.n} dif_maxima={resumo.dif_maxima:.1e} "
+        f"bit_a_bit={resumo.iguais_bit_a_bit} "
+        f"discordancias_0503={resumo.discordancias_equilibrio} "
+        f"discordancias_0358={resumo.discordancias_alta_sensibilidade}"
+    )
+    print("APROVADO" if resumo.aprovado else "REPROVADO")
+    return 0 if resumo.aprovado else 1
+
+
 def _montar_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Conversão do apendisite")
     sub = parser.add_subparsers(dest="comando", required=True)
@@ -62,6 +93,9 @@ def _montar_parser() -> argparse.ArgumentParser:
     sub.add_parser("sinteticos", help="gera os casos sintéticos").set_defaults(
         funcao=_sinteticos
     )
+    paridade = sub.add_parser("paridade-local", help="paridade nas 659 crianças")
+    paridade.add_argument("--dados", required=True, help="pasta com os .pkl")
+    paridade.set_defaults(funcao=_paridade_local)
     return parser
 
 
