@@ -1,6 +1,7 @@
 // Interface da calculadora. Único módulo, com dom.js, que toca o DOM.
 import { el, idiomaInicial, seletorDeIdioma } from './dom.js';
 import { acoplarRaioX, algumRaioXNaoRealizado, UNIDADES, UNIDADES_INICIAIS, VALORES_VAZIOS, validarFormulario } from './entrada.js';
+import { calcularAlvarado, calcularPas, dadosDosEscores } from './escores.js';
 import { formatarEscore, quadradosCheios } from './formato.js';
 import { calcularEscore, carregarModelo, classificar } from './modelo.js';
 import { DOI_CONCEITO, DOI_VERSAO, SIMBOLOS_UNIDADE, TEXTOS, mensagemDeErro, preencher, urlDoi } from './textos.js';
@@ -17,6 +18,7 @@ const estado = {
   resultado: null,
   modelo: null,
   erroModelo: false,
+  escoresAbertos: false,
 };
 
 function t(chave) {
@@ -42,7 +44,7 @@ function campoNumerico(campo, rotulo, { ajuda = null, grandeza = null } = {}) {
     ? el('select', {
         class: 'unidade',
         'aria-label': `${t('unidade')}: ${rotulo}`,
-        onchange: (evento) => { estado.unidades[grandeza] = evento.target.value; },
+        onchange: (evento) => { estado.unidades[grandeza] = evento.target.value; atualizarEscores(); },
       }, UNIDADES[grandeza].map((unidade) =>
         el('option', { value: unidade, selected: estado.unidades[grandeza] === unidade }, SIMBOLOS_UNIDADE[unidade])))
     : null;
@@ -58,7 +60,7 @@ function campoNumerico(campo, rotulo, { ajuda = null, grandeza = null } = {}) {
       value: estado.valores[campo],
       'aria-invalid': invalido ? 'true' : null,
       'aria-describedby': [ajuda ? `ajuda-${campo}` : null, invalido ? `erro-${campo}` : null].filter(Boolean).join(' ') || null,
-      oninput: (evento) => { estado.valores[campo] = evento.target.value; },
+      oninput: (evento) => { estado.valores[campo] = evento.target.value; atualizarEscores(); },
     }),
     seletor,
     mensagem(campo));
@@ -78,7 +80,10 @@ function campoEscolha(campo, rotulo, opcoes, aoMudar = null) {
           checked: estado.valores[campo] === valor,
           onchange: () => {
             if (aoMudar) aoMudar(valor);
-            else estado.valores[campo] = valor;
+            else {
+              estado.valores[campo] = valor;
+              atualizarEscores();
+            }
           },
         }),
         ` ${texto}`))),
@@ -101,6 +106,59 @@ function desenharCabecalho() {
     el('h1', {}, el('img', { class: 'logo', src: '/img/logo.png', alt: t('nome'), width: '1520', height: '299' })),
     el('p', { class: 'frase' }, t('frase')),
     seletorDeIdioma(estado.idioma, t('idioma_aviso'), trocarIdioma));
+}
+
+function blocoDoEscore(chaveNome, resultado, chaveCategorias, notas) {
+  return el('div', { class: 'bloco-escore' },
+    el('h3', {}, t(chaveNome)),
+    el('ul', {}, resultado.itens.map((item) => {
+      let situacao = 'pendente';
+      if (item.presente === true) situacao = 'presente';
+      if (item.presente === false) situacao = 'ausente';
+      const leitura = item.presente === null ? '' : ` ${t(item.presente ? 'sim' : 'nao')}`;
+      return el('li', { class: `item-escore ${situacao}` },
+        `${t(item.chave)} (${item.pontos})`,
+        el('span', { class: 'visualmente-oculto' }, leitura));
+    })),
+    resultado.total === null ? null : el('p', { class: 'total-escore' }, textoDoTotal(chaveNome, resultado, chaveCategorias)),
+    notas.map((nota) => el('p', { class: 'nota' }, t(nota))));
+}
+
+function textoDoTotal(chaveNome, resultado, chaveCategorias) {
+  return preencher(t('total_escore'), {
+    nome: t(chaveNome),
+    total: resultado.total,
+    categoria: t(chaveCategorias)[resultado.categoria],
+  });
+}
+
+function conteudoDosEscores() {
+  const dados = dadosDosEscores(estado.valores, estado.unidades);
+  return [
+    blocoDoEscore('alvarado_nome', calcularAlvarado(dados), 'alvarado_categorias', ['alvarado_origem']),
+    blocoDoEscore('pas_nome', calcularPas(dados), 'pas_categorias', ['pas_nota', 'pas_origem']),
+  ];
+}
+
+function atualizarEscores() {
+  document.getElementById('escores-itens')?.replaceChildren(...conteudoDosEscores());
+}
+
+function desenharEscores() {
+  return el('details', {
+    class: 'escores',
+    open: estado.escoresAbertos,
+    ontoggle: (evento) => { estado.escoresAbertos = evento.target.open; },
+  },
+    el('summary', {}, t('escores_titulo')),
+    el('p', {}, t('escores_abertura')),
+    campoEscolha('migracao', t('item_migracao'), simNao()),
+    campoEscolha('anorexia', t('item_anorexia'), simNao()),
+    campoEscolha('acetona', t('item_acetona'), simNao()),
+    campoEscolha('descompressao', t('item_descompressao'), simNao()),
+    campoEscolha('dor_tosse', t('item_dor_tosse'), simNao()),
+    campoNumerico('temperatura', t('temperatura_campo'), { ajuda: t('temperatura_nota'), grandeza: 'temperatura' }),
+    el('div', { id: 'escores-itens' }, conteudoDosEscores()));
 }
 
 function desenharFormulario() {
@@ -129,6 +187,7 @@ function desenharFormulario() {
       campoNumerico('neutrofilos', t('neutrofilos'), { grandeza: 'neutrofilos' }),
       campoNumerico('pcr', t('pcr'), { grandeza: 'pcr' }),
       campoNumerico('urina', t('urina'))),
+    desenharEscores(),
     el('div', { class: 'declaracao' },
       el('label', {},
         el('input', {
@@ -155,6 +214,10 @@ function desenharResultado() {
   return el('section', { id: 'resultado', class: `resultado faixa-${classe.faixa}`, tabindex: '-1', 'aria-live': 'polite' },
     el('h2', {}, t('resultado_titulo')),
     el('p', { class: 'escore' }, preencher(t('escore'), { escore: formatarEscore(escore, estado.idioma) })),
+    resultado.escores.alvarado.total === null ? null
+      : el('p', { class: 'total-escore' }, textoDoTotal('alvarado_nome', resultado.escores.alvarado, 'alvarado_categorias')),
+    resultado.escores.pas.total === null ? null
+      : el('p', { class: 'total-escore' }, textoDoTotal('pas_nome', resultado.escores.pas, 'pas_categorias')),
     el('p', {}, t('escore_nao_chance')),
     el('p', { class: 'corte' }, preencher(t('corte_alta'), { classe: rotulo(classe.altaSensibilidade) })),
     el('p', { class: 'corte' }, preencher(t('corte_equilibrio'), { classe: rotulo(classe.equilibrio) })),
@@ -222,7 +285,15 @@ function calcular() {
     return;
   }
   const escore = calcularEscore(estado.modelo, entrada);
-  estado.resultado = { escore, classe: classificar(escore), rxNaoRealizado: algumRaioXNaoRealizado(estado.valores) };
+  estado.resultado = {
+    escore,
+    classe: classificar(escore),
+    rxNaoRealizado: algumRaioXNaoRealizado(estado.valores),
+    escores: (() => {
+      const dados = dadosDosEscores(estado.valores, estado.unidades);
+      return { alvarado: calcularAlvarado(dados), pas: calcularPas(dados) };
+    })(),
+  };
   desenhar();
   document.getElementById('resultado').focus();
 }

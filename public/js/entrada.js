@@ -173,6 +173,10 @@ export function validarFormulario(valores, unidades) {
   const pcrMgdl = pcrDigitada === null ? null : pcrParaMgdl(pcrDigitada, uPcr);
   const urina = lerCampoNumerico('urina', valores.urina, FAIXAS.urina.campo, 'campo', erros);
 
+  if (!vazio(valores.temperatura)) {
+    const uTemp = unidades.temperatura;
+    lerCampoNumerico('temperatura', valores.temperatura, FAIXAS.temperatura[uTemp], uTemp, erros);
+  }
   if (valores.declaracao !== true) erros.push({ campo: 'declaracao', codigo: 'declaracao' });
   if (erros.length > 0) return { erros: ordenar(erros), entrada: null, convertidos: null };
 

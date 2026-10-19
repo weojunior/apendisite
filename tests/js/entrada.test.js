@@ -183,3 +183,20 @@ test('algumRaioXNaoRealizado', () => {
   assert.equal(algumRaioXNaoRealizado({ rx_fid: 'nao_realizado', rx_difuso: 'nao_realizado' }), true);
   assert.equal(algumRaioXNaoRealizado({ rx_fid: 'sim', rx_difuso: 'nao' }), false);
 });
+
+test('temperatura_vazia_nao_bloqueia', () => {
+  assert.deepEqual(validarFormulario(valoresValidos({ temperatura: '' }), UNIDADES_PT).erros, []);
+});
+
+test('temperatura_fora_da_faixa_bloqueia_o_calculo_inteiro', () => {
+  const { erros, entrada } = validarFormulario(valoresValidos({ temperatura: '44' }), UNIDADES_PT);
+  assert.equal(entrada, null);
+  assert.deepEqual(erros, [{ campo: 'temperatura', codigo: 'faixa', faixa: [34, 43], unidade: 'c' }]);
+});
+
+test('temperatura_em_fahrenheit_usa_a_faixa_da_unidade', () => {
+  const unidades = { ...UNIDADES_PT, temperatura: 'f' };
+  assert.deepEqual(validarFormulario(valoresValidos({ temperatura: '101' }), unidades).erros, []);
+  assert.deepEqual(validarFormulario(valoresValidos({ temperatura: '110' }), unidades).erros,
+    [{ campo: 'temperatura', codigo: 'faixa', faixa: [93.2, 109.4], unidade: 'f' }]);
+});
