@@ -4,11 +4,12 @@ import json
 import sys
 from pathlib import Path
 
-import joblib
 import pytest
 
 RAIZ = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RAIZ / "src"))
+
+from apendisite_conversao.exportar import carregar_pipeline  # noqa: E402
 
 CAMINHO_JOBLIB = RAIZ / "models" / "random_forest.joblib"
 CAMINHO_JSON = RAIZ / "public" / "modelo" / "random_forest_v1.0.0.json"
@@ -23,8 +24,8 @@ def raiz() -> Path:
 
 @pytest.fixture(scope="session")
 def pipeline():
-    """Pipeline do sklearn lido do .joblib publicado."""
-    return joblib.load(CAMINHO_JOBLIB)
+    """Pipeline do sklearn lido do .joblib publicado, com n_jobs igual a 1."""
+    return carregar_pipeline(CAMINHO_JOBLIB)
 
 
 @pytest.fixture(scope="session")

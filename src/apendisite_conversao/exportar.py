@@ -26,6 +26,26 @@ INDICES_INDICADOR_NUMERICAS = [1, 2, 3, 4, 5]
 INDICES_INDICADOR_BINARIAS = [0, 3, 6, 7, 8, 9, 10, 11]
 CATEGORIAS_SEXO = ["F", "M"]
 SEXO_UM = "M"
+N_JOBS_PREVISAO = 1
+
+
+def carregar_pipeline(caminho_joblib: Path):
+    """Lê o pipeline do .joblib com a floresta somada em uma thread só.
+
+    O .joblib foi salvo com n_jobs=-1. Nesse modo o sklearn soma as árvores
+    em várias threads, em ordem variável, e o escore muda na 16ª casa decimal
+    de uma chamada para outra. Com uma thread, a soma segue a ordem das
+    árvores, a mesma do modelo.js, e o resultado se repete.
+
+    Args:
+        caminho_joblib: caminho do .joblib publicado.
+
+    Returns:
+        Pipeline do sklearn com clf.n_jobs igual a 1.
+    """
+    pipeline = joblib.load(caminho_joblib)
+    pipeline.set_params(clf__n_jobs=N_JOBS_PREVISAO)
+    return pipeline
 
 
 def _exigir(condicao: bool, o_que: str) -> None:

@@ -11,12 +11,13 @@ from conftest import CAMINHO_JOBLIB, CAMINHO_JSON
 from apendisite_conversao.excecoes import EstruturaInesperada
 from apendisite_conversao.exportar import (
     SHA256_JOBLIB,
+    carregar_pipeline,
     conferir_estrutura,
     exportar_modelo,
     montar_json,
     serializar,
 )
-from apendisite_conversao.quadro import ENTRADAS
+from apendisite_conversao.quadro import ENTRADAS, montar_quadro
 
 
 def test_conferir_estrutura_aceita_o_modelo_publicado(pipeline):
@@ -101,3 +102,23 @@ def test_json_publicado_igual_a_uma_exportacao_nova(tmp_path):
     sha_novo = exportar_modelo(CAMINHO_JOBLIB, tmp_path / "modelo.json")
 
     assert sha_novo == hashlib.sha256(CAMINHO_JSON.read_bytes()).hexdigest()
+
+
+def test_carregar_pipeline_repete_o_escore_bit_a_bit():
+    rng = np.random.default_rng(3)
+    entradas = [
+        {
+            **dict(zip(ENTRADAS[:6], rng.uniform(0, 20000, 6).tolist())),
+            **dict(zip(ENTRADAS[6:18], rng.integers(0, 2, 12).astype(float).tolist())),
+            "sexo": "M",
+        }
+        for _ in range(300)
+    ]
+    quadro = montar_quadro(entradas)
+    pipeline = carregar_pipeline(CAMINHO_JOBLIB)
+
+    primeira = pipeline.predict_proba(quadro)
+    segunda = pipeline.predict_proba(quadro)
+
+    assert pipeline.named_steps["clf"].n_jobs == 1
+    assert np.array_equal(primeira, segunda)
