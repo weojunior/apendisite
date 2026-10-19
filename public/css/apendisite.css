@@ -1,0 +1,806 @@
+/*
+ * Estilo da calculadora apendisite.
+ * Cores do logo (palavra #00467c, símbolo de #45a0dd a #095289), fonte do sistema,
+ * coluna única. Tema claro fixo: o uso é no pronto-socorro e no congresso, sob luz
+ * artificial, e o logo do brand pack só existe em azul sobre fundo transparente.
+ * Raios: 6px nos controles, 10px nos blocos, 2px nos quadrados do pictograma.
+ */
+
+:root {
+  color-scheme: light;
+
+  --papel: #f5f7f9;
+  --campo: #fdfefe;
+  --tinta: #162636;
+  --apoio: #4b5b6b;
+  --marinho: #00467c;
+  --marinho-escuro: #003863;
+  --ceu: #368dc8;
+  --borda: #77879a;
+  --linha: #d5dde5;
+  --erro: #b42318;
+  --erro-fundo: #fbeceb;
+  --nota: #e9f0f6;
+  --veu: rgb(22 38 54 / 0.45);
+
+  /* Faixas do resultado. A cor marca a borda e os quadrados cheios (3:1 ou mais
+     contra o fundo da faixa), o texto da faixa usa o tom escuro (4,5:1 ou mais).
+     O amarelo é escurecido até o ocre para passar de 3:1 sobre fundo claro. */
+  --verde: #2f7a3b;
+  --verde-fundo: #ebf6ed;
+  --verde-texto: #1d5227;
+  --amarelo: #a37800;
+  --amarelo-fundo: #fdf5d3;
+  --amarelo-texto: #5c4500;
+  --vermelho: #c0362c;
+  --vermelho-fundo: #fcecea;
+  --vermelho-texto: #8a1f17;
+
+  --fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --texto-meta: 0.8125rem;
+  --texto-menor: 0.875rem;
+  --texto-corpo: 1rem;
+  --texto-grupo: 1.25rem;
+  --texto-titulo: 1.5625rem;
+
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 12px;
+  --e4: 16px;
+  --e5: 24px;
+  --e6: 32px;
+  --e7: 48px;
+
+  --raio-controle: 6px;
+  --raio-bloco: 10px;
+  --alvo: 44px;
+  --largura: 40rem;
+  --curva: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte);
+  font-size: var(--texto-corpo);
+  line-height: 1.5;
+}
+
+#app {
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 0 var(--e4);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+}
+
+h3 {
+  font-size: var(--texto-grupo);
+  font-weight: 600;
+}
+
+p,
+ul,
+ol {
+  margin: 0;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--marinho);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ceu);
+  outline-offset: 2px;
+}
+
+noscript p {
+  max-width: var(--largura);
+  margin: var(--e5) auto 0;
+  padding: 0 var(--e4);
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Cabeçalho */
+
+.cabecalho {
+  padding-top: var(--e5);
+}
+
+.logo {
+  display: block;
+  width: min(280px, 72vw);
+  height: auto;
+}
+
+.frase {
+  margin-top: var(--e3);
+  color: var(--apoio);
+  max-width: 65ch;
+}
+
+.idioma {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--e1);
+  margin-top: var(--e2);
+  color: var(--apoio);
+}
+
+.idioma button {
+  min-width: var(--alvo);
+  min-height: var(--alvo);
+  padding: 0 var(--e2);
+  border: 0;
+  border-radius: var(--raio-controle);
+  background: transparent;
+  color: var(--marinho);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.idioma button[aria-pressed="true"] {
+  color: var(--tinta);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  cursor: default;
+}
+
+.aviso-idioma {
+  flex-basis: 100%;
+  font-size: var(--texto-meta);
+}
+
+/* Formulário */
+
+main {
+  padding-top: var(--e5);
+}
+
+#formulario > p:first-child {
+  max-width: 65ch;
+}
+
+.grupo {
+  min-inline-size: 0;
+  margin: var(--e6) 0 0;
+  padding: var(--e5) 0 0;
+  border: 0;
+  border-top: 1px solid var(--linha);
+}
+
+/* A legenda flutua para ficar dentro do grupo. A margem de baixo dela dá o espaço,
+   porque a margem de cima do item seguinte some na limpeza do float. */
+.grupo > legend {
+  float: left;
+  width: 100%;
+  margin-bottom: var(--e3);
+  padding: 0;
+  font-size: var(--texto-grupo);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.grupo > legend + * {
+  clear: both;
+}
+
+.grupo > legend + .ajuda + * {
+  margin-top: var(--e3);
+}
+
+.ajuda {
+  color: var(--apoio);
+  font-size: var(--texto-menor);
+}
+
+.campo,
+.escolha {
+  margin-top: var(--e5);
+}
+
+/* Flex com quebra, e não grade: na grade, a linha de erro (que ocupa as duas
+   colunas) alargava a coluna do seletor de unidade. */
+.campo-numero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--e2);
+}
+
+.campo-numero > label,
+.campo-numero > .ajuda,
+.campo-numero > .erro {
+  flex-basis: 100%;
+}
+
+.campo-numero > input {
+  flex: 0 1 12rem;
+  min-width: 0;
+}
+
+.campo-numero > label {
+  font-weight: 500;
+}
+
+.campo-numero > .ajuda {
+  margin-bottom: var(--e1);
+}
+
+.campo-numero > label + input,
+.campo-numero > .ajuda + input {
+  margin-top: var(--e2);
+}
+
+.campo-numero > input + .unidade {
+  margin-top: var(--e2);
+}
+
+input[type="text"],
+select {
+  min-height: var(--alvo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-controle);
+  background: var(--campo);
+  color: var(--tinta);
+  font: inherit;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: var(--e2) var(--e3);
+  font-variant-numeric: tabular-nums;
+}
+
+.unidade {
+  padding: var(--e2) var(--e3);
+  cursor: pointer;
+}
+
+input[type="text"]:focus-visible,
+select:focus-visible {
+  border-color: var(--marinho);
+}
+
+input[aria-invalid="true"] {
+  border: 2px solid var(--erro);
+}
+
+.escolha {
+  min-inline-size: 0;
+  margin-inline: 0;
+  padding: 0;
+  border: 0;
+}
+
+.escolha > legend {
+  padding: 0;
+  font-weight: 500;
+}
+
+.opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  margin-top: var(--e2);
+}
+
+.opcoes label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  min-height: var(--alvo);
+  padding: 0 var(--e4) 0 var(--e3);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-controle);
+  background: var(--campo);
+  cursor: pointer;
+}
+
+.opcoes input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--marinho);
+}
+
+.opcoes label:has(input:checked) {
+  border-color: var(--marinho);
+  background: var(--nota);
+  box-shadow: inset 0 0 0 1px var(--marinho);
+}
+
+.opcoes input:focus-visible {
+  outline: none;
+}
+
+.opcoes label:has(input:focus-visible) {
+  outline: 3px solid var(--ceu);
+  outline-offset: 2px;
+}
+
+.escolha[aria-invalid="true"] .opcoes label {
+  border-color: var(--erro);
+}
+
+.erro {
+  margin-top: var(--e2);
+  color: var(--erro);
+  font-size: var(--texto-menor);
+  font-weight: 600;
+}
+
+.declaracao {
+  margin-top: var(--e6);
+  padding: var(--e4);
+  border-radius: var(--raio-bloco);
+  background: var(--nota);
+}
+
+.declaracao label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e3);
+  cursor: pointer;
+}
+
+.declaracao input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--marinho);
+}
+
+.declaracao input[aria-invalid="true"] {
+  outline: 2px solid var(--erro);
+  outline-offset: 2px;
+}
+
+.erro-modelo {
+  margin-top: var(--e5);
+  padding: var(--e3) var(--e4);
+  border: 1px solid var(--erro);
+  border-radius: var(--raio-controle);
+  background: var(--erro-fundo);
+  color: var(--erro);
+  font-weight: 600;
+}
+
+.botao-principal,
+.botao-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--e5);
+  border-radius: var(--raio-controle);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.botao-principal {
+  width: 100%;
+  margin-top: var(--e5);
+  border: 1px solid var(--marinho);
+  background: var(--marinho);
+  color: var(--papel);
+}
+
+.botao-secundario {
+  border: 1px solid var(--marinho);
+  background: var(--campo);
+  color: var(--marinho);
+}
+
+.botao-principal:active:not(:disabled),
+.botao-secundario:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.botao-principal:disabled,
+.botao-secundario:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Resultado */
+
+/* A faixa vem da classe que o app.js põe na section. Sem classe de faixa, o
+   bloco fica neutro. A faixa também está escrita no texto do resultado. */
+.resultado {
+  margin-top: var(--e6);
+  padding: var(--e5) var(--e4);
+  border: 1px solid var(--faixa-cor, var(--linha));
+  border-radius: var(--raio-bloco);
+  background: var(--faixa-fundo, var(--campo));
+}
+
+.resultado.faixa-baixa {
+  --faixa-cor: var(--verde);
+  --faixa-fundo: var(--verde-fundo);
+  --faixa-texto: var(--verde-texto);
+}
+
+.resultado.faixa-intermediaria {
+  --faixa-cor: var(--amarelo);
+  --faixa-fundo: var(--amarelo-fundo);
+  --faixa-texto: var(--amarelo-texto);
+}
+
+.resultado.faixa-alta {
+  --faixa-cor: var(--vermelho);
+  --faixa-fundo: var(--vermelho-fundo);
+  --faixa-texto: var(--vermelho-texto);
+}
+
+.resultado > * + * {
+  margin-top: var(--e3);
+}
+
+.resultado > h2 {
+  font-size: var(--texto-grupo);
+}
+
+/* Quebra equilibrada: no celular, a linha do escore não deixa "(0" sozinho no fim. */
+.escore {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  text-wrap: balance;
+}
+
+.corte {
+  font-variant-numeric: tabular-nums;
+}
+
+.faixa {
+  color: var(--faixa-texto, var(--tinta));
+  font-weight: 600;
+}
+
+.resultado > .pictograma {
+  margin-top: var(--e4);
+}
+
+.pictograma {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+  width: min(100%, 240px);
+}
+
+.quadrado {
+  aspect-ratio: 1;
+  border: 1px solid var(--borda);
+  border-radius: 2px;
+  background: var(--campo);
+}
+
+.quadrado.cheio {
+  border-color: var(--faixa-cor, var(--marinho));
+  background: var(--faixa-cor, var(--marinho));
+}
+
+.legenda {
+  color: var(--apoio);
+  font-size: var(--texto-menor);
+}
+
+.aviso {
+  padding: var(--e3) var(--e4);
+  border-radius: var(--raio-controle);
+  background: var(--nota);
+}
+
+/* Dentro do bloco tingido, o aviso fica em branco para não somar o azul à faixa. */
+.resultado .aviso {
+  background: var(--campo);
+}
+
+.linhas {
+  padding-left: 1.25em;
+  color: var(--apoio);
+  font-size: var(--texto-menor);
+}
+
+.linhas li + li {
+  margin-top: var(--e1);
+}
+
+/* Escores de Alvarado e PAS (Parte 3) */
+
+.escores {
+  margin-top: var(--e6);
+  padding-top: var(--e5);
+  border-top: 1px solid var(--linha);
+}
+
+.bloco-escore {
+  margin-top: var(--e5);
+}
+
+.item-escore {
+  margin-top: var(--e2);
+}
+
+.item-escore.ausente {
+  color: var(--apoio);
+}
+
+.item-escore.pendente {
+  color: var(--apoio);
+  font-style: italic;
+}
+
+.item-escore.presente {
+  font-weight: 600;
+}
+
+.total-escore {
+  margin-top: var(--e3);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.nota {
+  margin-top: var(--e2);
+  color: var(--apoio);
+  font-size: var(--texto-menor);
+}
+
+/* Convite, nota de utilidade e questionário (Parte 4) */
+
+.convite,
+.utilidade {
+  margin-top: var(--e5);
+  padding: var(--e4);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-bloco);
+  background: var(--campo);
+}
+
+.convite .botao-principal {
+  width: auto;
+}
+
+.escala {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1);
+  margin-top: var(--e3);
+}
+
+.escala button {
+  min-width: var(--alvo);
+  min-height: var(--alvo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-controle);
+  background: var(--campo);
+  color: var(--tinta);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.questionario {
+  width: min(36rem, calc(100% - 2 * var(--e4)));
+  max-height: calc(100dvh - 2 * var(--e4));
+  padding: var(--e5) var(--e4);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-bloco);
+  background: var(--campo);
+  color: var(--tinta);
+}
+
+.questionario::backdrop {
+  background: var(--veu);
+}
+
+.isca {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Seções recolhidas e autoria */
+
+.sobre {
+  margin-top: var(--e7);
+  border-top: 1px solid var(--linha);
+}
+
+.sobre details {
+  border-bottom: 1px solid var(--linha);
+}
+
+.sobre summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--alvo);
+  padding: var(--e3) 0;
+  color: var(--marinho);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sobre details > :not(summary) {
+  max-width: 65ch;
+  margin-bottom: var(--e4);
+}
+
+.sobre details ul {
+  padding-left: 1.25em;
+}
+
+.sobre details li + li {
+  margin-top: var(--e2);
+}
+
+.autoria {
+  margin-top: var(--e6);
+}
+
+.autoria h2 {
+  font-size: var(--texto-grupo);
+}
+
+.autoria > * + * {
+  margin-top: var(--e3);
+}
+
+.autoria > h3 {
+  margin-top: var(--e5);
+  font-size: var(--texto-corpo);
+}
+
+.autoria ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.referencias {
+  padding-left: 1.5em;
+  color: var(--apoio);
+  font-size: var(--texto-menor);
+  overflow-wrap: anywhere;
+}
+
+.referencias li + li {
+  margin-top: var(--e2);
+}
+
+/* Rodapé */
+
+.rodape {
+  margin-top: var(--e7);
+  padding: var(--e5) 0 var(--e7);
+  border-top: 1px solid var(--linha);
+  color: var(--apoio);
+  font-size: var(--texto-menor);
+}
+
+.rodape ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2) var(--e5);
+  padding: 0;
+  list-style: none;
+}
+
+.rodape a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo);
+}
+
+.rodape span {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo);
+}
+
+/* Movimento só em estado de controle, e só sem pedido de movimento reduzido */
+
+@media (prefers-reduced-motion: no-preference) {
+  .opcoes label,
+  .idioma button,
+  .escala button,
+  input[type="text"],
+  select {
+    transition: border-color 120ms var(--curva), background-color 120ms var(--curva);
+  }
+
+  .botao-principal,
+  .botao-secundario {
+    transition: background-color 120ms var(--curva), transform 80ms var(--curva);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .botao-principal:hover:not(:disabled) {
+    border-color: var(--marinho-escuro);
+    background: var(--marinho-escuro);
+  }
+
+  .botao-secundario:hover:not(:disabled),
+  .escala button:hover {
+    background: var(--nota);
+  }
+
+  .opcoes label:hover {
+    border-color: var(--marinho);
+  }
+
+  .idioma button[aria-pressed="false"]:hover {
+    text-decoration: underline;
+  }
+
+  .sobre summary:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (min-width: 48rem) {
+  #app {
+    padding: 0 var(--e5);
+  }
+
+  .cabecalho {
+    padding-top: var(--e6);
+  }
+
+  .botao-principal {
+    width: auto;
+    min-width: 16rem;
+  }
+}
