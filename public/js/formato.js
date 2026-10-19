@@ -1,7 +1,7 @@
 // Formatação de números para a tela. Funções puras.
 import { FREQUENCIAS } from './modelo.js';
 
-const LOCALIDADES = Object.freeze({ pt: 'pt-BR', en: 'en-US' });
+export const LOCALIDADES = Object.freeze({ pt: 'pt-BR', en: 'en-US' });
 
 /** Formata um número com o separador decimal e de milhar do idioma. */
 export function formatarNumero(valor, idioma) {
