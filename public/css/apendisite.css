@@ -652,6 +652,40 @@ input[aria-invalid="true"] {
   overflow: hidden;
 }
 
+.questionario > * + * {
+  margin-top: var(--e3);
+}
+
+.escala .ancora {
+  flex-basis: 100%;
+  color: var(--apoio);
+  font-size: var(--texto-menor);
+}
+
+/* Os cinco pontos do SUS numa linha só, também em 375 px */
+.escala label {
+  flex: 1 1 0;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 var(--e1);
+}
+
+/* Botão com cara de link, para abrir o questionário pelo rodapé */
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--marinho);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
 /* Seções recolhidas e autoria */
 
 .sobre {
