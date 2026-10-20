@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "apendisite",
+  "account_id": "838d6356e968881a5b4a969406ee0d68",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "apendisite.com.br", "custom_domain": true }],
+  "assets": {
+    "directory": "./public",
+    "run_worker_first": ["/api", "/api/*"],
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "vars": { "ORIGEM_PERMITIDA": "https://apendisite.com.br" },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "apendisite",
+      "database_id": "COLAR_AQUI_O_DATABASE_ID", "migrations_dir": "migrations" }
+  ],
+  "observability": { "enabled": false },
+  // No wrangler dev, o host local vira o da rota em todo cabeçalho, inclusive o Origin.
+  // Com o host local aqui, o Worker vê http://localhost:8787, o valor do .dev.vars.
+  "dev": { "host": "localhost:8787", "upstream_protocol": "http" }
+}
