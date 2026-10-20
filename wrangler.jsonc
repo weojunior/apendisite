@@ -16,7 +16,7 @@
   "vars": { "ORIGEM_PERMITIDA": "https://apendisite.com.br" },
   "d1_databases": [
     { "binding": "DB", "database_name": "apendisite",
-      "database_id": "COLAR_AQUI_O_DATABASE_ID", "migrations_dir": "migrations" }
+      "database_id": "b5ba7a8a-f049-4ad4-9ca6-aec53b46b2cc", "migrations_dir": "migrations" }
   ],
   "observability": { "enabled": false },
   // No wrangler dev, o host local vira o da rota em todo cabeçalho, inclusive o Origin.
