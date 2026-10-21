@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "apendisite",
+  "account_id": "838d6356e968881a5b4a969406ee0d68",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "apendisite.com.br", "custom_domain": true }],
+  "assets": {
+    "directory": "./plano-b",
+    "not_found_handling": "single-page-application"
+  },
+  "observability": { "enabled": false }
+}
