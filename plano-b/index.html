@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>apendisite</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="stylesheet" href="/estilo.css">
+</head>
+<body>
+  <main class="pagina-simples">
+    <section lang="pt-BR">
+      <h1><img class="logo" src="/img/logo.png" alt="apendisite" width="1520" height="299"></h1>
+      <p>Escore de apendicite em crianças de 2 a 14 anos, por um modelo de aprendizado de máquina desenvolvido e validado por cirurgiões pediátricos e pesquisadores da FMB/UNESP, Botucatu (SP). Ferramenta de pesquisa para médicos e estudantes de medicina.</p>
+      <h2>Como o modelo foi feito</h2>
+      <p>O apendisite usa um random forest (500 árvores, profundidade máxima 5) treinado com 15 dados de rotina do pronto-socorro: idade, sexo, peso, náusea, vômito, febre, disúria, dor à palpação em fossa ilíaca direita, dor difusa à palpação, dois achados da radiografia simples, leucócitos, neutrófilos, PCR e leucócitos na urina. Quatro variáveis derivadas usam cortes fixos (leucócitos acima de 10.000/mm³, neutrófilos acima de 7.500/mm³, PCR acima de 5,0 mg/dL e leucócitos na urina acima de 10 por campo).</p>
+      <p>O desfecho é a decisão de operar, tomada pela equipe de cirurgia pediátrica. Na validação, as 76 crianças operadas tiveram apendicite confirmada.</p>
+      <p>A derivação incluiu 339 crianças atendidas no HC-FMB/UNESP de 2019 a 2021, das quais 176 (51,9%) foram operadas. Os dois cortes foram fixados no grupo de teste da derivação (102 crianças), antes da validação. O corte de equilíbrio (0,503) é o índice de Youden. O corte de alta sensibilidade (0,358) é o de maior especificidade com sensibilidade de pelo menos 95%.</p>
+      <p>A validação prospectiva incluiu 320 crianças em Botucatu (SP), de março a setembro de 2025, das quais 76 (23,8%) foram operadas. A AUC foi 0,89 (IC 95% 0,84 a 0,92).</p>
+      <p>Aplicado sem retreino a dois bancos públicos da Alemanha, o modelo teve AUC 0,77 em Regensburg (781 crianças) e 0,78 em Düsseldorf (301) para a decisão cirúrgica. A análise é do nosso grupo, foi apresentada em congresso e não foi publicada.</p>
+      <h2>Autoria</h2>
+      <ul>
+        <li>Bruna Aliotto Nalin Tedesco, MD, PhD, cirurgiã pediátrica</li>
+        <li>Wilson Elias de Oliveira Junior, MD, PhD, cirurgião pediátrico</li>
+        <li>Erika Veruska Paiva Ortolan, MD, PhD, cirurgiã pediátrica</li>
+      </ul>
+      <p>Faculdade de Medicina de Botucatu (FMB/UNESP), Botucatu (SP). Contato: <a href="mailto:contato@apendisite.com.br">contato@apendisite.com.br</a></p>
+      <h2>Como citar</h2>
+      <p>Tedesco BAN, Oliveira Junior WE, Ortolan EVP. apendisite: a random forest for appendicitis in children [software]. Versão 1.0.0. Zenodo; 2026. doi:10.5281/zenodo.23474325. Resultados apresentados no 38º Congresso Brasileiro de Cirurgia Pediátrica, 2026.</p>
+    </section>
+    <section lang="en">
+      <p>Appendicitis score for children aged 2 to 14 years, from a machine learning model developed and validated by pediatric surgeons and researchers at FMB/UNESP, Botucatu, Brazil. A research tool for physicians and medical students.</p>
+      <h2>How the model was built</h2>
+      <p>apendisite uses a random forest (500 trees, maximum depth 5) trained on 15 routine emergency department data points: age, sex, weight, nausea, vomiting, fever, dysuria, right lower quadrant tenderness, diffuse abdominal tenderness, two plain radiograph findings, white blood cell count, neutrophils, C-reactive protein and urine white blood cells. Four derived variables use fixed thresholds (white blood cell count above 10,000/mm³, neutrophils above 7,500/mm³, C-reactive protein above 5.0 mg/dL and urine white blood cells above 10 per high-power field).</p>
+      <p>The outcome is the decision to operate, made by the pediatric surgery team. In validation, all 76 children who underwent surgery had confirmed appendicitis.</p>
+      <p>The derivation cohort included 339 children seen at HC-FMB/UNESP from 2019 to 2021, of whom 176 (51.9%) underwent surgery. Both cutoffs were fixed in the derivation test set (102 children), before validation. The balanced cutoff (0.503) is the Youden index. The high-sensitivity cutoff (0.358) is the one with the highest specificity among those with a sensitivity of at least 95%.</p>
+      <p>The prospective validation included 320 children in Botucatu, Brazil, from March to September 2025, of whom 76 (23.8%) underwent surgery. The AUC was 0.89 (95% CI 0.84 to 0.92).</p>
+      <p>Applied without retraining to two public German datasets, the model had an AUC of 0.77 in Regensburg (781 children) and 0.78 in Düsseldorf (301) for the surgical decision. This analysis was done by our group, presented at a conference and not yet published.</p>
+      <h2>Authors</h2>
+      <ul>
+        <li>Bruna Aliotto Nalin Tedesco, MD, PhD, pediatric surgeon</li>
+        <li>Wilson Elias de Oliveira Junior, MD, PhD, pediatric surgeon</li>
+        <li>Erika Veruska Paiva Ortolan, MD, PhD, pediatric surgeon</li>
+      </ul>
+      <p>Botucatu Medical School (FMB/UNESP), Botucatu, Brazil. Contact: <a href="mailto:contato@apendisite.com.br">contato@apendisite.com.br</a></p>
+      <h2>How to cite</h2>
+      <p>Tedesco BAN, Oliveira Junior WE, Ortolan EVP. apendisite: a random forest for appendicitis in children [software]. Version 1.0.0. Zenodo; 2026. doi:10.5281/zenodo.23474325. Results presented at the 38th Brazilian Congress of Pediatric Surgery, 2026.</p>
+    </section>
+  </main>
+</body>
+</html>
