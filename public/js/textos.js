@@ -1,6 +1,7 @@
 // Textos aprovados pelo Wilson em 19/10/2026 (docs/textos_aprovados.md).
 // Qualquer mudança passa por ele. O teste confere cada texto contra o documento.
-import { formatarNumero } from './formato.js';
+import { PAISES } from './contrato_api.js';
+import { LOCALIDADES, formatarNumero } from './formato.js';
 
 export const IDIOMAS = Object.freeze(['pt', 'en']);
 export const CHAVE_IDIOMA = 'apendisite.idioma';
@@ -468,4 +469,13 @@ export function mensagemDeErro(erro, idioma) {
     max: formatarNumero(erro.faixa[1], idioma),
     unidade: simboloDaUnidade(erro.unidade, idioma),
   });
+}
+
+/** Países com o nome no idioma da página, dado pelo próprio navegador. Brasil primeiro. */
+export function listaDePaises(idioma) {
+  const nomes = new Intl.DisplayNames([LOCALIDADES[idioma]], { type: 'region' });
+  const outros = PAISES.filter((codigo) => codigo !== 'BR')
+    .map((codigo) => [codigo, nomes.of(codigo)])
+    .sort((a, b) => a[1].localeCompare(b[1], idioma));
+  return [['BR', nomes.of('BR')], ...outros];
 }

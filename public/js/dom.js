@@ -61,3 +61,12 @@ export function seletorDeIdioma(idioma, aviso, aoTrocar) {
   );
   return el('div', { class: 'idioma' }, botoes[0], ' | ', botoes[1], el('span', { class: 'aviso-idioma' }, aviso));
 }
+
+/** O localStorage, ou null se o navegador bloqueia o acesso. */
+export function armazenamento() {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
