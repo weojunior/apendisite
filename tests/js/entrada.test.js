@@ -11,6 +11,7 @@ import {
   neutrofilosParaMm3,
   paraMm3,
   pcrParaMgdl,
+  progressoDoFormulario,
   validarFormulario,
 } from '../../public/js/entrada.js';
 
@@ -199,4 +200,17 @@ test('temperatura_em_fahrenheit_usa_a_faixa_da_unidade', () => {
   assert.deepEqual(validarFormulario(valoresValidos({ temperatura: '101' }), unidades).erros, []);
   assert.deepEqual(validarFormulario(valoresValidos({ temperatura: '110' }), unidades).erros,
     [{ campo: 'temperatura', codigo: 'faixa', faixa: [93.2, 109.4], unidade: 'f' }]);
+});
+
+test('progresso_do_formulario_vazio_e_zero_de_16', () => {
+  assert.deepEqual(progressoDoFormulario(VALORES_VAZIOS), { preenchidos: 0, total: 16 });
+});
+
+test('progresso_do_formulario_completo_e_16_de_16', () => {
+  assert.deepEqual(progressoDoFormulario(valoresValidos()), { preenchidos: 16, total: 16 });
+});
+
+test('progresso_nao_conta_escores_opcionais_nem_espaco_em_branco', () => {
+  const valores = valoresValidos({ idade: '  ', migracao: 'sim', temperatura: '37', declaracao: false });
+  assert.deepEqual(progressoDoFormulario(valores), { preenchidos: 14, total: 16 });
 });
