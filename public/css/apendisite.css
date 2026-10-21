@@ -784,6 +784,62 @@ input[aria-invalid="true"] {
   min-height: var(--alvo);
 }
 
+/* Páginas de texto simples: 404, Privacidade e plano B. Fora do #app, o cabeçalho
+   e o main repetem a largura e a margem da calculadora. */
+
+body > .cabecalho,
+.pagina-simples {
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding-inline: var(--e4);
+}
+
+.pagina-simples {
+  padding-bottom: var(--e7);
+}
+
+.pagina-simples h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.pagina-simples p,
+.pagina-simples ul {
+  max-width: 65ch;
+}
+
+.pagina-simples > * + *,
+.pagina-simples section > * + * {
+  margin-top: var(--e4);
+}
+
+.pagina-simples section > h2 {
+  margin-top: var(--e6);
+}
+
+.pagina-simples ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.pagina-simples li + li {
+  margin-top: var(--e2);
+}
+
+/* Sem JavaScript, as duas seções aparecem, separadas por uma linha. Com uma
+   delas escondida, a que fica não ganha a linha. */
+.pagina-simples section:not([hidden]) + section {
+  margin-top: var(--e7);
+  padding-top: var(--e6);
+  border-top: 1px solid var(--linha);
+}
+
+.pagina-simples nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo);
+}
+
 /* Movimento só em estado de controle, e só sem pedido de movimento reduzido */
 
 @media (prefers-reduced-motion: no-preference) {
@@ -829,6 +885,11 @@ input[aria-invalid="true"] {
 @media (min-width: 48rem) {
   #app {
     padding: 0 var(--e5);
+  }
+
+  body > .cabecalho,
+  .pagina-simples {
+    padding-inline: var(--e5);
   }
 
   .cabecalho {
