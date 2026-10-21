@@ -54,7 +54,9 @@ test('pagina_404_bilingue_sem_javascript', async () => {
 test('modelo_versionado_em_cache_longo_e_codigo_sempre_revalidado', async () => {
   const texto = await lerTexto('public/_headers');
   assert.equal(lerBloco(texto, '/modelo/*')['Cache-Control'], 'public, max-age=31536000, immutable');
-  for (const caminho of ['/js/*', '/css/*', '/img/*']) {
-    assert.equal(lerBloco(texto, caminho)['Cache-Control'], 'public, max-age=300, must-revalidate', caminho);
+  // JS e CSS sem prazo: módulos de versões diferentes não podem se misturar depois de um deploy.
+  for (const caminho of ['/js/*', '/css/*']) {
+    assert.equal(lerBloco(texto, caminho)['Cache-Control'], 'public, max-age=0, must-revalidate', caminho);
   }
+  assert.equal(lerBloco(texto, '/img/*')['Cache-Control'], 'public, max-age=300, must-revalidate');
 });
