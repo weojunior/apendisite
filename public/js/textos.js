@@ -8,8 +8,8 @@ export const CHAVE_IDIOMA = 'apendisite.idioma';
 
 // DOI da versão 1.0.0, reservado no rascunho do Zenodo (Fase A6).
 export const DOI_VERSAO = '10.5281/zenodo.23474325';
-// DOI do conceito, que só existe depois da publicação (22/10).
-export const DOI_CONCEITO = null;
+// DOI do conceito (todas as versões), publicado no Zenodo em 21/10/2026.
+export const DOI_CONCEITO = '10.5281/zenodo.23474324';
 
 export const SIMBOLOS_UNIDADE = Object.freeze({
   mm3: '/mm³',
