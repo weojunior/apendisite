@@ -461,18 +461,26 @@ function calcular() {
   document.getElementById('resultado').focus();
 }
 
-async function iniciar() {
-  estado.idioma = idiomaInicial();
-  estado.unidades = { ...UNIDADES_INICIAIS[estado.idioma] };
+/** Baixa o modelo em segundo plano e libera o botão Calcular quando ele chega. */
+async function carregarModeloEmSegundoPlano() {
   try {
     const resposta = await fetch(CAMINHO_MODELO);
     estado.modelo = carregarModelo(await resposta.json());
+    const botao = document.querySelector('#formulario .botao-principal');
+    if (botao) botao.disabled = false;
   } catch {
     estado.erroModelo = true;
+    desenhar();
   }
+}
+
+async function iniciar() {
+  estado.idioma = idiomaInicial();
+  estado.unidades = { ...UNIDADES_INICIAIS[estado.idioma] };
   estado.respondido = lerRespondido(armazenamento());
   desenhar();
   enviarSemFalha(ROTAS.evento, montarCorpoEvento('abriu', estado.idioma));
+  await carregarModeloEmSegundoPlano();
 }
 
 iniciar();

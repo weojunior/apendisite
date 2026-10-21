@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
+import { readdir, stat } from 'node:fs/promises';
 import { lerJson, lerTexto } from './auxiliares.js';
 
 const DOMINIOS_PERMITIDOS = ['https://doi.org/', 'https://zenodo.org/', 'https://apendisite.com.br'];
@@ -78,4 +78,27 @@ test('pagina_principal_avisa_sem_javascript_nos_dois_idiomas', async () => {
   const html = await lerTexto('public/index.html');
   assert.ok(html.includes('A calculadora do apendisite precisa de JavaScript.'));
   assert.ok(html.includes('The apendisite calculator requires JavaScript.'));
+});
+
+test('pagina_principal_pre_carrega_os_modulos_e_o_modelo', async () => {
+  const html = await lerTexto('public/index.html');
+  const modulos = (await readdir(new URL('../../public/js/', import.meta.url))).filter((n) => n.endsWith('.js') && n !== 'privacidade.js' && n !== 'app.js');
+  for (const modulo of modulos) {
+    assert.ok(html.includes(`<link rel="modulepreload" href="/js/${modulo}">`), modulo);
+  }
+  assert.ok(html.includes('<link rel="preload" href="/modelo/random_forest_v1.0.0.json" as="fetch" crossorigin>'));
+});
+
+test('orcamento_de_peso_da_primeira_visita', async () => {
+  const tamanho = async (caminho) => (await stat(new URL(`../../${caminho}`, import.meta.url))).size;
+  assert.ok((await tamanho('public/img/logo.png')) < 15_000, 'logo.png');
+  assert.ok((await tamanho('public/css/apendisite.css')) < 20_000, 'css');
+  assert.ok((await tamanho('public/index.html')) < 3_000, 'html');
+});
+
+test('app_desenha_o_formulario_antes_de_esperar_o_modelo', async () => {
+  const codigo = await lerTexto('public/js/app.js');
+  const iniciar = codigo.slice(codigo.indexOf('async function iniciar()'));
+  assert.ok(!iniciar.includes('await fetch'), 'iniciar não espera o fetch');
+  assert.ok(iniciar.indexOf('desenhar()') < iniciar.indexOf('await carregarModeloEmSegundoPlano()'), 'desenhar antes do modelo');
 });
