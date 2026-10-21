@@ -57,6 +57,7 @@ for caminho in / /privacidade/ "$CAMINHO_JSON" /api/saude; do
   conferir "$r" "5. Sem Set-Cookie em $caminho"
 done
 
+# Só o bloco /* vale para todas as respostas; os blocos por caminho (cache) não entram aqui.
 for caminho in / /api/saude; do
   recebidos="$(cabecalhos_de "$BASE$caminho")"
   while IFS= read -r linha; do
@@ -70,7 +71,7 @@ for caminho in / /api/saude; do
         conferir "$r" "6. $nome em $caminho"
         ;;
     esac
-  done < "$RAIZ/public/_headers"
+  done < <(awk '/^\/\*$/ {dentro=1; next} /^[^ ]/ {dentro=0} dentro' "$RAIZ/public/_headers")
 done
 
 corpo="$(curl -s -A "$NAVEGADOR" "$BASE/api/saude")"
