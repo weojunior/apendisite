@@ -57,6 +57,7 @@ for caminho in / /privacidade/ "$CAMINHO_JSON" /api/saude; do
   conferir "$r" "5. Sem Set-Cookie em $caminho"
 done
 
+# Só o bloco /* vale para todas as respostas; os blocos por caminho (cache) não entram aqui.
 for caminho in / /api/saude; do
   recebidos="$(cabecalhos_de "$BASE$caminho")"
   while IFS= read -r linha; do
@@ -70,7 +71,7 @@ for caminho in / /api/saude; do
         conferir "$r" "6. $nome em $caminho"
         ;;
     esac
-  done < "$RAIZ/public/_headers"
+  done < <(awk '/^\/\*$/ {dentro=1; next} /^[^ ]/ {dentro=0} dentro' "$RAIZ/public/_headers")
 done
 
 corpo="$(curl -s -A "$NAVEGADOR" "$BASE/api/saude")"
@@ -87,8 +88,12 @@ if [ "$(status_de "$BASE/privacidade/")" = "200" ]; then r=sim; else r=nao; fi
 conferir "$r" "9. /privacidade/ dá 200"
 
 if [ -n "$WORKERS_DEV" ]; then
-  if [ "$(status_de "https://apendisite.$WORKERS_DEV.workers.dev/")" != "200" ]; then r=sim; else r=nao; fi
-  conferir "$r" "10. apendisite.$WORKERS_DEV.workers.dev não serve o site"
+  codigo="$(status_de "https://apendisite.$WORKERS_DEV.workers.dev/")"
+  case "$codigo" in
+    000) nao_conferido "10. workers.dev sem resposta (código 000), repetir de outra rede" ;;
+    200) falhou "10. apendisite.$WORKERS_DEV.workers.dev serve o site (200)" ;;
+    *) passou "10. apendisite.$WORKERS_DEV.workers.dev não serve o site ($codigo)" ;;
+  esac
 else
   nao_conferido "10. workers.dev (passe --workers-dev SUBDOMINIO)"
 fi
