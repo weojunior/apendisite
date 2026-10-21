@@ -56,6 +56,7 @@
   --alvo: 44px;
   --largura: 40rem;
   --curva: cubic-bezier(0.23, 1, 0.32, 1);
+  --z-barra: 10;
 }
 
 *,
@@ -168,6 +169,50 @@ noscript p {
   color: var(--apoio);
 }
 
+/* Na calculadora, o seletor de idioma sobe para a linha do logo e a frase e o aviso
+   descem para a largura toda. Nas páginas simples vale o .idioma comum acima. */
+#app .cabecalho {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "logo idioma"
+    "frase frase"
+    "aviso aviso";
+  align-items: center;
+  column-gap: var(--e3);
+}
+
+#app .cabecalho > h1 {
+  grid-area: logo;
+}
+
+#app .logo {
+  width: min(280px, 52vw);
+}
+
+#app .cabecalho .frase {
+  grid-area: frase;
+}
+
+#app .cabecalho .idioma {
+  display: contents;
+}
+
+#app .idioma-botoes {
+  grid-area: idioma;
+}
+
+#app .aviso-idioma {
+  grid-area: aviso;
+  margin-top: var(--e2);
+}
+
+.idioma-botoes {
+  display: inline-flex;
+  align-items: center;
+  column-gap: var(--e1);
+}
+
 .idioma button {
   min-width: var(--alvo);
   min-height: var(--alvo);
@@ -240,7 +285,7 @@ main {
 
 .campo,
 .escolha {
-  margin-top: var(--e5);
+  margin-top: var(--e4);
 }
 
 /* Flex com quebra, e não grade: na grade, a linha de erro (que ocupa as duas
@@ -363,6 +408,59 @@ input[aria-invalid="true"] {
   outline-offset: 2px;
 }
 
+/* Perguntas de duas respostas: botões de meia largura. Sim e Não ficam na linha da
+   pergunta, também em 375 px. As outras (sexo) só a partir de 30rem. */
+.escolha-curta {
+  --largura-opcoes: 12rem;
+}
+
+.escolha-curta .opcoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.escolha-curta > .erro {
+  clear: both;
+}
+
+.escolha-sn > legend {
+  float: left;
+  width: calc(100% - var(--largura-opcoes) - var(--e3));
+  padding-top: 10px;
+}
+
+.escolha-sn .opcoes {
+  width: var(--largura-opcoes);
+  margin: 0 0 0 auto;
+}
+
+.escolha-sn .opcoes label {
+  gap: var(--e1);
+  padding: 0 var(--e2);
+}
+
+@media (min-width: 30rem) {
+  .escolha-curta {
+    --largura-opcoes: 18rem;
+  }
+
+  .escolha-curta > legend {
+    float: left;
+    width: calc(100% - var(--largura-opcoes) - var(--e3));
+    padding-top: 10px;
+  }
+
+  .escolha-curta .opcoes {
+    width: var(--largura-opcoes);
+    margin: 0 0 0 auto;
+  }
+
+  .escolha-sn .opcoes label {
+    gap: var(--e2);
+    padding: 0 var(--e4) 0 var(--e3);
+  }
+}
+
 .escolha[aria-invalid="true"] .opcoes label {
   border-color: var(--erro);
 }
@@ -439,6 +537,39 @@ input[aria-invalid="true"] {
   color: var(--marinho);
 }
 
+/* Barra de ação: fica colada no pé da tela enquanto o formulário está à vista.
+   A faixa mostra, sem texto, quanto do formulário já tem resposta. */
+.barra-acao {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-barra);
+  margin: var(--e5) calc(-1 * var(--e4)) 0;
+  padding: var(--e3) var(--e4) calc(var(--e3) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--linha);
+  background: var(--papel);
+}
+
+.barra-acao .botao-principal {
+  width: 100%;
+  margin-top: var(--e3);
+}
+
+.progresso {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--linha);
+  overflow: hidden;
+}
+
+.progresso-cheio {
+  display: block;
+  height: 100%;
+  background: var(--marinho);
+  transform: scaleX(var(--progresso, 0));
+  transform-origin: left;
+  transition: transform 200ms var(--curva);
+}
+
 .botao-principal:active:not(:disabled),
 .botao-secundario:active:not(:disabled) {
   transform: scale(0.98);
@@ -480,6 +611,50 @@ input[aria-invalid="true"] {
   --faixa-texto: var(--vermelho-texto);
 }
 
+@keyframes entrar {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.resultado-novo {
+  animation: entrar 160ms var(--curva);
+}
+
+/* Texto da faixa e pictograma lado a lado a partir de 34rem. No celular, em coluna. */
+.bloco-faixa {
+  display: grid;
+  gap: var(--e3);
+}
+
+@media (min-width: 34rem) {
+  .bloco-faixa {
+    grid-template-columns: 1fr 200px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "faixa quadro"
+      "legenda quadro";
+    align-items: start;
+    column-gap: var(--e5);
+  }
+
+  .bloco-faixa > .faixa {
+    grid-area: faixa;
+  }
+
+  .bloco-faixa > .pictograma {
+    grid-area: quadro;
+  }
+
+  .bloco-faixa > .legenda {
+    grid-area: legenda;
+  }
+}
+
 .resultado > * + * {
   margin-top: var(--e3);
 }
@@ -504,10 +679,6 @@ input[aria-invalid="true"] {
 .faixa {
   color: var(--faixa-texto, var(--tinta));
   font-weight: 600;
-}
-
-.resultado > .pictograma {
-  margin-top: var(--e4);
 }
 
 .pictograma {
@@ -607,8 +778,20 @@ input[aria-invalid="true"] {
   background: var(--campo);
 }
 
-.convite .botao-principal {
+.convite {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2) var(--e3);
+}
+
+.convite > p {
+  flex-basis: 100%;
+}
+
+.convite .botao-principal,
+.convite .botao-secundario {
   width: auto;
+  margin-top: 0;
 }
 
 .escala {
@@ -899,5 +1082,15 @@ body > .cabecalho,
   .botao-principal {
     width: auto;
     min-width: 16rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resultado-novo {
+    animation: none;
+  }
+
+  .progresso-cheio {
+    transition: none;
   }
 }

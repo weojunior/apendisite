@@ -217,3 +217,15 @@ export function acoplarRaioX(valores, campo, valor) {
 export function algumRaioXNaoRealizado(valores) {
   return valores.rx_fid === 'nao_realizado' || valores.rx_difuso === 'nao_realizado';
 }
+
+/** Campos que o modelo exige mais a declaração. Os escores opcionais ficam de fora. */
+const CAMPOS_OBRIGATORIOS = Object.freeze(ORDEM_CAMPOS.slice(0, ORDEM_CAMPOS.indexOf('migracao')));
+
+/** Quantos campos obrigatórios já têm resposta (a declaração conta), para a barra de progresso. */
+export function progressoDoFormulario(valores) {
+  const respondidos = CAMPOS_OBRIGATORIOS.filter((campo) => !vazio(valores[campo])).length;
+  return {
+    preenchidos: respondidos + (valores.declaracao === true ? 1 : 0),
+    total: CAMPOS_OBRIGATORIOS.length + 1,
+  };
+}

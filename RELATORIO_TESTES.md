@@ -6,7 +6,7 @@ Data: 20/10/2026. Branch `feat/parte-5-producao`. Node v25.9.0 e Python 3.14.3.
 
 | Suíte | Comando | Arquivos | Testes | Resultado |
 |---|---|---|---|---|
-| JavaScript | `npm test` | 16 | 132 | 132 passaram, 0 falharam |
+| JavaScript | `npm test` | 16 | 139 | 139 passaram, 0 falharam |
 | Python | `./.venv/bin/python -m pytest` | 5 | 29 | 29 passaram |
 
 Saída do `npm test` (trecho final):
@@ -14,8 +14,8 @@ Saída do `npm test` (trecho final):
 ```
 casos 1958, diferença máxima 0, iguais bit a bit 1958
 sem Math.fround, 87 de 558 casos nos limiares divergem
-ℹ tests 132
-ℹ pass 132
+ℹ tests 139
+ℹ pass 139
 ℹ fail 0
 ```
 

@@ -59,7 +59,7 @@ export function seletorDeIdioma(idioma, aviso, aoTrocar) {
       },
     }, codigo.toUpperCase()),
   );
-  return el('div', { class: 'idioma' }, botoes[0], ' | ', botoes[1], el('span', { class: 'aviso-idioma' }, aviso));
+  return el('div', { class: 'idioma' }, el('span', { class: 'idioma-botoes' }, botoes[0], ' | ', botoes[1]), el('span', { class: 'aviso-idioma' }, aviso));
 }
 
 /** O localStorage, ou null se o navegador bloqueia o acesso. */

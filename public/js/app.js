@@ -1,7 +1,7 @@
 // Interface da calculadora. Único módulo, com dom.js, que toca o DOM.
 import { ROTAS } from './contrato_api.js';
 import { armazenamento, el, idiomaInicial, seletorDeIdioma } from './dom.js';
-import { acoplarRaioX, algumRaioXNaoRealizado, UNIDADES, UNIDADES_INICIAIS, VALORES_VAZIOS, validarFormulario } from './entrada.js';
+import { acoplarRaioX, algumRaioXNaoRealizado, progressoDoFormulario, UNIDADES, UNIDADES_INICIAIS, VALORES_VAZIOS, validarFormulario } from './entrada.js';
 import { calcularAlvarado, calcularPas, dadosDosEscores } from './escores.js';
 import { formatarEscore, quadradosCheios } from './formato.js';
 import { calcularEscore, carregarModelo, classificar } from './modelo.js';
@@ -49,6 +49,18 @@ function erroDo(campo) {
   return estado.erros.find((erro) => erro.campo === campo) ?? null;
 }
 
+function atualizarProgresso() {
+  const barra = document.getElementById('barra-acao');
+  if (!barra) return;
+  const { preenchidos, total } = progressoDoFormulario(estado.valores);
+  barra.style.setProperty('--progresso', String(preenchidos / total));
+}
+
+function aoMudarValor() {
+  atualizarEscores();
+  atualizarProgresso();
+}
+
 function mensagem(campo) {
   const erro = erroDo(campo);
   return erro ? el('p', { class: 'erro', id: `erro-${campo}` }, mensagemDeErro(erro, estado.idioma)) : null;
@@ -60,7 +72,7 @@ function campoNumerico(campo, rotulo, { ajuda = null, grandeza = null } = {}) {
     ? el('select', {
         class: 'unidade',
         'aria-label': `${t('unidade')}: ${rotulo}`,
-        onchange: (evento) => { estado.unidades[grandeza] = evento.target.value; atualizarEscores(); },
+        onchange: (evento) => { estado.unidades[grandeza] = evento.target.value; aoMudarValor(); },
       }, UNIDADES[grandeza].map((unidade) =>
         el('option', { value: unidade, selected: estado.unidades[grandeza] === unidade }, SIMBOLOS_UNIDADE[unidade])))
     : null;
@@ -76,15 +88,21 @@ function campoNumerico(campo, rotulo, { ajuda = null, grandeza = null } = {}) {
       value: estado.valores[campo],
       'aria-invalid': invalido ? 'true' : null,
       'aria-describedby': [ajuda ? `ajuda-${campo}` : null, invalido ? `erro-${campo}` : null].filter(Boolean).join(' ') || null,
-      oninput: (evento) => { estado.valores[campo] = evento.target.value; atualizarEscores(); },
+      oninput: (evento) => { estado.valores[campo] = evento.target.value; aoMudarValor(); },
     }),
     seletor,
     mensagem(campo));
 }
 
+/** Duas respostas viram botões de meia largura. Sim e Não ficam na linha da pergunta, até no celular. */
+function classeDaEscolha(opcoes) {
+  if (opcoes.length !== 2) return 'escolha';
+  return opcoes[0][0] === 'sim' ? 'escolha escolha-curta escolha-sn' : 'escolha escolha-curta';
+}
+
 function campoEscolha(campo, rotulo, opcoes, aoMudar = null) {
   const invalido = erroDo(campo) !== null;
-  return el('fieldset', { class: 'escolha', 'aria-invalid': invalido ? 'true' : null, 'aria-describedby': invalido ? `erro-${campo}` : null },
+  return el('fieldset', { class: classeDaEscolha(opcoes), 'aria-invalid': invalido ? 'true' : null, 'aria-describedby': invalido ? `erro-${campo}` : null },
     el('legend', {}, rotulo),
     el('div', { class: 'opcoes' }, opcoes.map(([valor, texto], i) =>
       el('label', {},
@@ -98,7 +116,7 @@ function campoEscolha(campo, rotulo, opcoes, aoMudar = null) {
             if (aoMudar) aoMudar(valor);
             else {
               estado.valores[campo] = valor;
-              atualizarEscores();
+              aoMudarValor();
             }
           },
         }),
@@ -113,7 +131,13 @@ function simNao() {
 function mudarRaioX(campo) {
   return (valor) => {
     estado.valores = acoplarRaioX(estado.valores, campo, valor);
-    desenhar();
+    // Atualiza as marcas no lugar: refazer a página tirava o foco de quem usa o teclado.
+    for (const nome of ['rx_fid', 'rx_difuso']) {
+      for (const opcao of document.querySelectorAll(`input[name="${nome}"]`)) {
+        opcao.checked = opcao.value === estado.valores[nome];
+      }
+    }
+    aoMudarValor();
   };
 }
 
@@ -211,12 +235,14 @@ function desenharFormulario() {
           id: 'campo-declaracao',
           checked: estado.valores.declaracao,
           'aria-invalid': erroDo('declaracao') ? 'true' : null,
-          onchange: (evento) => { estado.valores.declaracao = evento.target.checked; },
+          onchange: (evento) => { estado.valores.declaracao = evento.target.checked; atualizarProgresso(); },
         }),
         ` ${t('declaracao')}`),
       mensagem('declaracao')),
     estado.erroModelo ? el('p', { class: 'erro-modelo', role: 'alert' }, t('erro_modelo')) : null,
-    el('button', { type: 'submit', class: 'botao-principal', disabled: estado.modelo === null }, t('calcular')));
+    el('div', { id: 'barra-acao', class: 'barra-acao' },
+      el('div', { class: 'progresso', 'aria-hidden': 'true' }, el('span', { class: 'progresso-cheio' })),
+      el('button', { type: 'submit', class: 'botao-principal', disabled: estado.modelo === null }, t('calcular'))));
 }
 
 function desenharResultado() {
@@ -227,19 +253,22 @@ function desenharResultado() {
   const cheios = quadradosCheios(classe.faixa);
   const quadrados = Array.from({ length: QUADRADOS_NO_PICTOGRAMA }, (_, i) =>
     el('span', { class: i < cheios ? 'quadrado cheio' : 'quadrado' }));
-  return el('section', { id: 'resultado', class: `resultado faixa-${classe.faixa}`, tabindex: '-1', 'aria-live': 'polite' },
+  const classeNova = resultado.novo ? ' resultado-novo' : '';
+  resultado.novo = false;
+  return el('section', { id: 'resultado', class: `resultado faixa-${classe.faixa}${classeNova}`, tabindex: '-1', 'aria-live': 'polite' },
     el('h2', {}, t('resultado_titulo')),
     el('p', { class: 'escore' }, preencher(t('escore'), { escore: formatarEscore(escore, estado.idioma) })),
+    el('p', {}, t('escore_nao_chance')),
+    el('div', { class: 'bloco-faixa' },
+      el('p', { class: 'faixa' }, t(`faixa_${classe.faixa}`)),
+      el('div', { class: 'pictograma', role: 'img', 'aria-label': t('legenda_pictograma') }, quadrados),
+      el('p', { class: 'legenda' }, t('legenda_pictograma'))),
+    el('p', { class: 'corte' }, preencher(t('corte_alta'), { classe: rotulo(classe.altaSensibilidade) })),
+    el('p', { class: 'corte' }, preencher(t('corte_equilibrio'), { classe: rotulo(classe.equilibrio) })),
     resultado.escores.alvarado.total === null ? null
       : el('p', { class: 'total-escore' }, textoDoTotal('alvarado_nome', resultado.escores.alvarado, 'alvarado_categorias')),
     resultado.escores.pas.total === null ? null
       : el('p', { class: 'total-escore' }, textoDoTotal('pas_nome', resultado.escores.pas, 'pas_categorias')),
-    el('p', {}, t('escore_nao_chance')),
-    el('p', { class: 'corte' }, preencher(t('corte_alta'), { classe: rotulo(classe.altaSensibilidade) })),
-    el('p', { class: 'corte' }, preencher(t('corte_equilibrio'), { classe: rotulo(classe.equilibrio) })),
-    el('p', { class: 'faixa' }, t(`faixa_${classe.faixa}`)),
-    el('div', { class: 'pictograma', role: 'img', 'aria-label': t('legenda_pictograma') }, quadrados),
-    el('p', { class: 'legenda' }, t('legenda_pictograma')),
     rxNaoRealizado ? el('p', { class: 'aviso' }, t('aviso_rx')) : null,
     el('ul', { class: 'linhas' }, t('linhas_visiveis').map((linha) => el('li', {}, linha))),
     desenharAbaixoDoResultado());
@@ -424,6 +453,7 @@ function desenhar() {
     el('dialog', { id: 'questionario', class: 'questionario', onclose: () => { estado.questionario = questionarioVazio(); } }),
   ];
   document.getElementById('app').replaceChildren(...partes.filter(Boolean));
+  atualizarProgresso();
 }
 
 function trocarIdioma(idioma) {
@@ -450,6 +480,7 @@ function calcular() {
     escore,
     classe: classificar(escore),
     rxNaoRealizado: algumRaioXNaoRealizado(estado.valores),
+    novo: true,
     escores: (() => {
       const dados = dadosDosEscores(estado.valores, estado.unidades);
       return { alvarado: calcularAlvarado(dados), pas: calcularPas(dados) };
@@ -458,21 +489,32 @@ function calcular() {
   estado.visita = registrarResultado(estado.visita);
   enviarSemFalha(ROTAS.evento, montarCorpoEvento('calculou', estado.idioma));
   desenhar();
-  document.getElementById('resultado').focus();
+  const bloco = document.getElementById('resultado');
+  bloco.focus({ preventScroll: true });
+  const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  bloco.scrollIntoView({ behavior: reduzido ? 'auto' : 'smooth', block: 'start' });
+}
+
+/** Baixa o modelo em segundo plano e libera o botão Calcular quando ele chega. */
+async function carregarModeloEmSegundoPlano() {
+  try {
+    const resposta = await fetch(CAMINHO_MODELO);
+    estado.modelo = carregarModelo(await resposta.json());
+    const botao = document.querySelector('#formulario .botao-principal');
+    if (botao) botao.disabled = false;
+  } catch {
+    estado.erroModelo = true;
+    desenhar();
+  }
 }
 
 async function iniciar() {
   estado.idioma = idiomaInicial();
   estado.unidades = { ...UNIDADES_INICIAIS[estado.idioma] };
-  try {
-    const resposta = await fetch(CAMINHO_MODELO);
-    estado.modelo = carregarModelo(await resposta.json());
-  } catch {
-    estado.erroModelo = true;
-  }
   estado.respondido = lerRespondido(armazenamento());
   desenhar();
   enviarSemFalha(ROTAS.evento, montarCorpoEvento('abriu', estado.idioma));
+  await carregarModeloEmSegundoPlano();
 }
 
 iniciar();
