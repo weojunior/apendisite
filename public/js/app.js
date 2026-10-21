@@ -427,7 +427,6 @@ function desenharSobre() {
       el('p', {}, t('instituicao')),
       el('p', {}, t('fomento')),
       comoCitar,
-      el('p', {}, t('dados_alema')),
       el('h3', {}, t('referencias_titulo')),
       el('ol', { class: 'referencias' }, t('referencias').map((ref) => el('li', {}, ref)))));
 }
