@@ -42,26 +42,24 @@ Datas: 20 e 21/10/2026. Produção: `https://apendisite.com.br`, `main` em `02e1
 
 ### Conferência de produção
 
-O `scripts/conferir_producao.sh` foi rodado na máquina do Wilson e na do assistente. A partir das 23:10 de 20/10, o IPv4 dessa rede passou a receber "Connection reset by peer" no handshake TLS com parte dos IPs da Cloudflare (também com `example.com`), e o IPv6 funcionou de modo intermitente. Nenhuma rodada única terminou limpa depois das mudanças na zona. A tabela junta as melhores observações de cada item.
+Rodada completa de 21/10/2026, com `scripts/conferir_producao.sh --workers-dev woliveirajr-cipe` na versão do commit `bedba11` (PR weojunior/apendisite#10), contra a produção com o estado final da zona. Resultado: 28 linhas PASSOU, 0 FALHOU, 2 NÃO CONFERIDO.
 
 | Item | Resultado | Evidência |
 |---|---|---|
-| 1. `/` dá 200 e traz a versão 1.0.0 do modelo | PASSOU | Rodada com `curl -6` e versão corrigida do script (PR #8). Falhou em outras rodadas só com código 000. |
-| 2. `www` dá 301 para o apex com a query preservada | PASSOU | Saída do Wilson: `301 https://apendisite.com.br/qualquer?x=1`. |
-| 3. `http://` redireciona para `https://` | PASSOU | Rodada com `curl -6`: `301 https://apendisite.com.br/`. |
-| 4. Nenhum script de outro domínio nem `cloudflareinsights` | PASSOU | Todas as rodadas com resposta. |
-| 5. Sem `Set-Cookie` em `/`, `/privacidade/`, no JSON do modelo e em `/api/saude` | PASSOU | Todas as rodadas com resposta. |
-| 6. Oito cabeçalhos de segurança e `Cache-Control` | PASSOU | Rodada com a versão corrigida do script: 26 itens PASSOU e só os itens 2 e 3 falhando, antes de a zona ser configurada. |
-| 7. `/api/saude` dá 200 com `{"ok":true}` | PASSOU | Mesma rodada. |
-| 8. SHA-256 do JSON publicado bate com o repositório e o model card | PASSOU | Mesma rodada. |
-| 9. `/privacidade/` dá 200 | PASSOU | Mesma rodada. |
-| 10. `workers.dev` não serve o site | PASSOU | Captura do Wilson: `apendisite.woliveirajr-cipe.workers.dev` mostra "There is nothing here yet". O script, com a correção do PR #8, marca NÃO CONFERIDO quando a rede não responde. |
-| 11. NS na Cloudflare e três MX do Email Routing | PASSOU | `dig` no 8.8.8.8 e no servidor `albert.ns.cloudflare.com`. |
+| 1. `/` dá 200 e traz a versão 1.0.0 do modelo | PASSOU | Código 200 e `<meta name="versao-modelo" content="1.0.0">`. |
+| 2. `www` dá 301 para o apex com a query preservada | PASSOU | `301 https://apendisite.com.br/qualquer?x=1`. |
+| 3. `http://` redireciona para `https://` | PASSOU | `301 https://apendisite.com.br/`. |
+| 4. Nenhum script de outro domínio nem `cloudflareinsights` | PASSOU | Página recebida com código 200. |
+| 5. Sem `Set-Cookie` em `/`, `/privacidade/`, no JSON do modelo e em `/api/saude` | PASSOU | Quatro linhas PASSOU. |
+| 6. Oito cabeçalhos de segurança em `/` e em `/api/saude` | PASSOU | Dezesseis linhas PASSOU. |
+| 7. `/api/saude` dá 200 com `{"ok":true}` | PASSOU | |
+| 8. SHA-256 do JSON publicado bate com o repositório e o model card | PASSOU | |
+| 9. `/privacidade/` dá 200 | PASSOU | |
+| 10. `workers.dev` não serve o site | NÃO CONFERIDO pelo script | O script recebeu código 000 do `workers.dev` e não conta isso como aprovação. A captura do Wilson de `apendisite.woliveirajr-cipe.workers.dev` mostra "There is nothing here yet". |
+| 11. NS na Cloudflare e três MX do Email Routing | PASSOU | `dig` no 8.8.8.8. |
 | 12. DOI | NÃO CONFERIDO | O DOI só resolve depois da publicação no Zenodo, em 22/10. |
 
-Limitação: o item 3 e os itens 6 a 9 foram vistos passando antes ou durante a configuração da zona, mas nenhuma rodada completa foi feita com o estado final da zona. Repetir `scripts/conferir_producao.sh --workers-dev woliveirajr-cipe` de outra rede está pendente. O Wilson aceitou registrar assim, porque o hotspot do celular não funcionou.
-
-A correção do script (blocos de cache por caminho do `_headers` e resposta 000 no item 10) está no PR weojunior/apendisite#8, não mesclado na data desta seção.
+Contexto: a partir das 23:10 de 20/10, o IPv4 da rede usada para o desenvolvimento passou a receber "Connection reset by peer" no handshake TLS com parte dos IPs da Cloudflare (também com `example.com`). Nesse período, rodadas anteriores falharam por conexão, não por defeito da página. Essas falhas expuseram quatro defeitos do script, corrigidos nos PRs #8 e #10: blocos de cache por caminho do `_headers` comparados com `/`, item 10 aprovado com código 000, página buscada em duas requisições sem nova tentativa, e itens 4, 5 e 6 aprovados ou reprovados sem resposta.
 
 ### Configuração da zona no painel da Cloudflare
 

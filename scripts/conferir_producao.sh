@@ -28,12 +28,30 @@ nao_conferido() { printf 'NÃO CONFERIDO  %s\n' "$1"; }
 conferir() { if [ "$1" = "sim" ]; then passou "$2"; else falhou "$2"; fi; }
 status_de() { curl -s -o /dev/null -w '%{http_code}' -A "$NAVEGADOR" "$1"; }
 cabecalhos_de() { curl -s -o /dev/null -D - -A "$NAVEGADOR" -H 'Accept: text/html' "$1" | tr -d '\r'; }
-pagina_de() { curl -s -A "$NAVEGADOR" -H 'Accept: text/html,application/xhtml+xml' "$1"; }
+carregar_pagina() {
+  # Uma só requisição traz o corpo e o código. Até 3 tentativas, porque em rede
+  # instável o primeiro pedido pode levar reset de conexão (código 000).
+  local tentativa resposta
+  PAGINA=""
+  CODIGO_PAGINA="000"
+  for tentativa in 1 2 3; do
+    resposta="$(curl -s -m 15 -A "$NAVEGADOR" -H 'Accept: text/html,application/xhtml+xml' -w '\n%{http_code}' "$1")"
+    CODIGO_PAGINA="${resposta##*$'\n'}"
+    PAGINA="${resposta%$'\n'*}"
+    [ "$CODIGO_PAGINA" != "000" ] && break
+    sleep 1
+  done
+}
 redirecionamento_de() { curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$1"; }
 
-pagina="$(pagina_de "$BASE/")"
-if [ "$(status_de "$BASE/")" = "200" ] && echo "$pagina" | grep -q '<meta name="versao-modelo" content="1.0.0">'; then r=sim; else r=nao; fi
-conferir "$r" "1. / dá 200 e traz a versão 1.0.0 do modelo"
+carregar_pagina "$BASE/"
+pagina="$PAGINA"
+if [ "$CODIGO_PAGINA" = "000" ]; then
+  nao_conferido "1. / sem resposta em 3 tentativas, repetir de outra rede"
+else
+  if [ "$CODIGO_PAGINA" = "200" ] && echo "$pagina" | grep -q '<meta name="versao-modelo" content="1.0.0">'; then r=sim; else r=nao; fi
+  conferir "$r" "1. / dá 200 e traz a versão 1.0.0 do modelo (código $CODIGO_PAGINA)"
+fi
 
 if [ "$BASE" = "$PRODUCAO" ]; then
   resposta="$(redirecionamento_de 'https://www.apendisite.com.br/qualquer?x=1')"
@@ -49,17 +67,30 @@ fi
 
 externos="$(echo "$pagina" | grep -oiE '<script[^>]*src="[^"]*"' | grep -iE 'src="(https?:)?//' || true)"
 insights="$(echo "$pagina" | grep -ioE 'cloudflareinsights|beacon\.min\.js' || true)"
-if [ -z "$externos" ] && [ -z "$insights" ]; then r=sim; else r=nao; fi
-conferir "$r" "4. Nenhum script de outro domínio nem cloudflareinsights"
+if [ "$CODIGO_PAGINA" = "000" ]; then
+  nao_conferido "4. página sem resposta, scripts de outro domínio não verificados"
+else
+  if [ -z "$externos" ] && [ -z "$insights" ]; then r=sim; else r=nao; fi
+  conferir "$r" "4. Nenhum script de outro domínio nem cloudflareinsights"
+fi
 
 for caminho in / /privacidade/ "$CAMINHO_JSON" /api/saude; do
-  if cabecalhos_de "$BASE$caminho" | grep -qi '^set-cookie:'; then r=nao; else r=sim; fi
+  recebidos="$(cabecalhos_de "$BASE$caminho")"
+  if [ -z "$recebidos" ]; then
+    nao_conferido "5. $caminho sem resposta, Set-Cookie não verificado"
+    continue
+  fi
+  if echo "$recebidos" | grep -qi '^set-cookie:'; then r=nao; else r=sim; fi
   conferir "$r" "5. Sem Set-Cookie em $caminho"
 done
 
 # Só o bloco /* vale para todas as respostas; os blocos por caminho (cache) não entram aqui.
 for caminho in / /api/saude; do
   recebidos="$(cabecalhos_de "$BASE$caminho")"
+  if [ -z "$recebidos" ]; then
+    nao_conferido "6. $caminho sem resposta, cabeçalhos não verificados"
+    continue
+  fi
   while IFS= read -r linha; do
     case "$linha" in
       "  "*:*)
