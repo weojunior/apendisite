@@ -44,35 +44,59 @@ Faixas aceitas (Q3.28, aprovadas em 19/10/2026), que entram no lugar de <mín> e
 
 ## 3. Resultado
 
+Reescrita aprovada pelo Wilson em 22/10/2026. Sai a leitura de cada corte como positivo ou negativo, e os números da validação vão para a gaveta "Por trás dos números", fechada por padrão.
+
 PT
-- Escore do modelo: <0,62> (de 0 a 1)
-- O escore não é a chance de cirurgia. A frequência da faixa, abaixo, mostra o que aconteceu com crianças de escore parecido.
-- Corte de alta sensibilidade (0,358): <positivo|negativo>. Na validação, sensibilidade 98,7% e especificidade 48,8%.
-- Corte de equilíbrio (0,503): <positivo|negativo>. Na validação, sensibilidade 88,2% e especificidade 74,2%.
-- Faixa baixa (escore abaixo de 0,358): Na validação em Botucatu, 1 das 120 crianças nesta faixa foi operada (0,8%).
-- Faixa intermediária (escore de 0,358 até abaixo de 0,503): Na validação em Botucatu, 8 das 70 crianças nesta faixa foram operadas (11,4%).
-- Faixa alta (escore de 0,503 ou mais): Na validação em Botucatu, 67 das 130 crianças nesta faixa foram operadas (51,5%).
-- Legenda do pictograma: Cada quadrado é 1 de 100 crianças. Os quadrados cheios são as crianças operadas.
-- Aviso, só quando a radiografia for "Não realizado": Sem raio X, o modelo assume o achado mais comum da derivação. Na validação, isso levou 22 das 320 crianças a positivas no corte de equilíbrio. O desempenho sem raio X não foi validado.
-- Três linhas visíveis:
-  1. Validado em Botucatu (SP), onde 24% das crianças foram operadas. Em outro serviço, as frequências por faixa podem ser outras.
-  2. Estima a decisão de operar. Não estima apendicite complicada.
-  3. Ferramenta de pesquisa. Não substitui a avaliação clínica.
+- Escore <0,42>: <baixo|intermediário|alto>
+- Nível do escore: baixo, intermediário, alto
+- O escore vai de 0 a 1.
+- Escore baixo: Em Botucatu, 1 de cada 100 crianças com escore baixo foi operada.
+- Escore intermediário: Em Botucatu, 11 de cada 100 crianças com escore intermediário foram operadas.
+- Escore alto: Em Botucatu, 52 de cada 100 crianças com escore alto foram operadas.
+- Legenda do pictograma: Cada quadrado é uma criança. Os cheios são as operadas.
+- Aviso, só quando a radiografia for "Não realizado": Sem raio X, este resultado não foi testado. Use com mais cautela.
+- Linha visível: Ferramenta de pesquisa, validada só em Botucatu. Não substitui a avaliação clínica.
+- Gaveta fechada: Por trás dos números
+  - Os três grupos de escore
+    1. Baixo, abaixo de 0,358: 1 de 120 crianças operada (0,8%).
+    2. Intermediário, de 0,358 a 0,502: 8 de 70 (11,4%).
+    3. Alto, 0,503 ou mais: 67 de 130 (51,5%).
+  - Os dois cortes
+  - Os limites dos grupos são os dois cortes do modelo.
+    1. O corte de 0,358 foi feito para quase não deixar passar uma criança que vai ser operada. Na validação, 98,7% das operadas ficaram acima dele (sensibilidade). Entre as não operadas, 48,8% ficaram abaixo (especificidade).
+    2. O corte de 0,503 equilibra os dois erros, com sensibilidade de 88,2% e especificidade de 74,2%.
+  - A validação
+  - 320 crianças em Botucatu (SP), de março a setembro de 2025, das quais 24% foram operadas. A AUC foi 0,89.
+  - O que o modelo não faz
+    1. Estima a decisão de operar. Não estima apendicite complicada.
+    2. O escore não é calibrado. Em serviço com mais ou menos cirurgias, as frequências dos grupos mudam.
+    3. Sem raio X, o modelo usa o achado mais comum da derivação. O desempenho sem o exame não foi testado.
 
 EN
-- Model score: <0.62> (0 to 1)
-- The score is not the chance of surgery. The band frequency below shows what happened to children with a similar score.
-- High-sensitivity cutoff (0.358): <positive|negative>. In validation, sensitivity 98.7% and specificity 48.8%.
-- Balanced cutoff (0.503): <positive|negative>. In validation, sensitivity 88.2% and specificity 74.2%.
-- Low band (score below 0.358): In the Botucatu validation, 1 of the 120 children in this band underwent surgery (0.8%).
-- Intermediate band (score from 0.358 to below 0.503): In the Botucatu validation, 8 of the 70 children in this band underwent surgery (11.4%).
-- High band (score of 0.503 or higher): In the Botucatu validation, 67 of the 130 children in this band underwent surgery (51.5%).
-- Icon array caption: Each square is 1 in 100 children. Filled squares are children who underwent surgery.
-- Notice, only when the radiograph is "Not performed": Without a radiograph, the model assumes the most common finding in the derivation cohort. In validation, this moved 22 of the 320 children to positive at the balanced cutoff. Performance without a radiograph was not validated.
-- Three visible lines:
-  1. Validated in Botucatu, Brazil, where 24% of the children underwent surgery. In another setting, the band frequencies may differ.
-  2. Estimates the decision to operate. It does not estimate complicated appendicitis.
-  3. Research tool. It does not replace clinical assessment.
+- Score <0.42>: <low|intermediate|high>
+- Score level: low, intermediate, high
+- The score ranges from 0 to 1.
+- Low score: In Botucatu, 1 in every 100 children with a low score underwent surgery.
+- Intermediate score: In Botucatu, 11 in every 100 children with an intermediate score underwent surgery.
+- High score: In Botucatu, 52 in every 100 children with a high score underwent surgery.
+- Icon array caption: Each square is one child. Filled squares are those who underwent surgery.
+- Notice, only when the radiograph is "Not performed": Without a radiograph, this result was not tested. Use it with more caution.
+- Visible line: Research tool, validated only in Botucatu, Brazil. It does not replace clinical assessment.
+- Closed drawer: Behind the numbers
+  - The three score groups
+    1. Low, below 0.358: 1 of 120 children underwent surgery (0.8%).
+    2. Intermediate, from 0.358 to 0.502: 8 of 70 (11.4%).
+    3. High, 0.503 or higher: 67 of 130 (51.5%).
+  - The two cutoffs
+  - The group limits are the two cutoffs of the model.
+    1. The 0.358 cutoff was set to miss almost no child who will undergo surgery. In validation, 98.7% of the children who underwent surgery scored above it (sensitivity). Among those who did not, 48.8% scored below it (specificity).
+    2. The 0.503 cutoff balances the two errors, with sensitivity of 88.2% and specificity of 74.2%.
+  - The validation
+  - 320 children in Botucatu, Brazil, from March to September 2025, of whom 24% underwent surgery. The AUC was 0.89.
+  - What the model does not do
+    1. Estimates the decision to operate. It does not estimate complicated appendicitis.
+    2. The score is not calibrated. In a setting with more or fewer operations, the group frequencies change.
+    3. Without a radiograph, the model uses the most common finding in the derivation cohort. Performance without the exam was not tested.
 
 ## 4. Escores de Alvarado e PAS (seção opcional)
 
