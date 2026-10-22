@@ -672,10 +672,6 @@ input[aria-invalid="true"] {
   text-wrap: balance;
 }
 
-.corte {
-  font-variant-numeric: tabular-nums;
-}
-
 .faixa {
   color: var(--faixa-texto, var(--tinta));
   font-weight: 600;
@@ -716,14 +712,23 @@ input[aria-invalid="true"] {
   background: var(--campo);
 }
 
-.linhas {
-  padding-left: 1.25em;
-  color: var(--apoio);
-  font-size: var(--texto-menor);
+/* Gaveta "Por trás dos números", fechada por padrão. */
+.numeros {
+  border-top: 1px solid var(--faixa-cor, var(--linha));
 }
 
-.linhas li + li {
-  margin-top: var(--e1);
+.numeros-corpo {
+  max-width: 65ch;
+  font-size: var(--texto-menor);
+  font-variant-numeric: tabular-nums;
+}
+
+.numeros-corpo > * + * {
+  margin-top: var(--e2);
+}
+
+.numeros-subtitulo {
+  font-weight: 600;
 }
 
 /* Escores de Alvarado e PAS (Parte 3) */
@@ -881,6 +886,7 @@ input[aria-invalid="true"] {
 }
 
 .escores > summary,
+.numeros > summary,
 .sobre summary {
   display: flex;
   align-items: center;
@@ -896,11 +902,13 @@ input[aria-invalid="true"] {
   margin-bottom: var(--e4);
 }
 
-.sobre details ul {
+.sobre details ul,
+.numeros ul {
   padding-left: 1.25em;
 }
 
-.sobre details li + li {
+.sobre details li + li,
+.numeros li + li {
   margin-top: var(--e2);
 }
 
@@ -1060,6 +1068,7 @@ body > .cabecalho,
   }
 
   .escores > summary:hover,
+  .numeros > summary:hover,
   .sobre summary:hover {
     text-decoration: underline;
   }

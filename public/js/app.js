@@ -31,6 +31,7 @@ const estado = {
   modelo: null,
   erroModelo: false,
   escoresAbertos: false,
+  numerosAbertos: false,
   visita: novaVisita(),
   respondido: false,
   questionario: questionarioVazio(),
@@ -249,7 +250,6 @@ function desenharResultado() {
   const resultado = estado.resultado;
   if (!resultado) return null;
   const { escore, classe, rxNaoRealizado } = resultado;
-  const rotulo = (positivo) => t(positivo ? 'positivo' : 'negativo');
   const cheios = quadradosCheios(classe.faixa);
   const quadrados = Array.from({ length: QUADRADOS_NO_PICTOGRAMA }, (_, i) =>
     el('span', { class: i < cheios ? 'quadrado cheio' : 'quadrado' }));
@@ -257,21 +257,44 @@ function desenharResultado() {
   resultado.novo = false;
   return el('section', { id: 'resultado', class: `resultado faixa-${classe.faixa}${classeNova}`, tabindex: '-1', 'aria-live': 'polite' },
     el('h2', {}, t('resultado_titulo')),
-    el('p', { class: 'escore' }, preencher(t('escore'), { escore: formatarEscore(escore, estado.idioma) })),
+    el('p', { class: 'escore' }, preencher(t('escore'), {
+      escore: formatarEscore(escore, estado.idioma),
+      nivel: t(`nivel_${classe.faixa}`),
+    })),
     el('p', {}, t('escore_nao_chance')),
     el('div', { class: 'bloco-faixa' },
       el('p', { class: 'faixa' }, t(`faixa_${classe.faixa}`)),
       el('div', { class: 'pictograma', role: 'img', 'aria-label': t('legenda_pictograma') }, quadrados),
       el('p', { class: 'legenda' }, t('legenda_pictograma'))),
-    el('p', { class: 'corte' }, preencher(t('corte_alta'), { classe: rotulo(classe.altaSensibilidade) })),
-    el('p', { class: 'corte' }, preencher(t('corte_equilibrio'), { classe: rotulo(classe.equilibrio) })),
+    rxNaoRealizado ? el('p', { class: 'aviso' }, t('aviso_rx')) : null,
     resultado.escores.alvarado.total === null ? null
       : el('p', { class: 'total-escore' }, textoDoTotal('alvarado_nome', resultado.escores.alvarado, 'alvarado_categorias')),
     resultado.escores.pas.total === null ? null
       : el('p', { class: 'total-escore' }, textoDoTotal('pas_nome', resultado.escores.pas, 'pas_categorias')),
-    rxNaoRealizado ? el('p', { class: 'aviso' }, t('aviso_rx')) : null,
-    el('ul', { class: 'linhas' }, t('linhas_visiveis').map((linha) => el('li', {}, linha))),
+    el('p', { class: 'legenda' }, t('linha_limite')),
+    desenharPorTrasDosNumeros(),
     desenharAbaixoDoResultado());
+}
+
+function desenharPorTrasDosNumeros() {
+  const lista = (chave) => el('ul', {}, t(chave).map((linha) => el('li', {}, linha)));
+  const subtitulo = (chave) => el('p', { class: 'numeros-subtitulo' }, t(chave));
+  return el('details', {
+    class: 'numeros',
+    open: estado.numerosAbertos,
+    ontoggle: (evento) => { estado.numerosAbertos = evento.target.open; },
+  },
+    el('summary', {}, t('numeros_titulo')),
+    el('div', { class: 'numeros-corpo' },
+      subtitulo('numeros_grupos_titulo'),
+      lista('numeros_grupos'),
+      subtitulo('numeros_cortes_titulo'),
+      el('p', {}, t('numeros_cortes_abertura')),
+      lista('numeros_cortes'),
+      subtitulo('numeros_validacao_titulo'),
+      el('p', {}, t('numeros_validacao')),
+      subtitulo('numeros_limites_titulo'),
+      lista('numeros_limites')));
 }
 
 function desenharAbaixoDoResultado() {
